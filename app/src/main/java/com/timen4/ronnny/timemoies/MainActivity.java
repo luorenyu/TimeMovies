@@ -96,7 +96,11 @@ public class MainActivity extends ActionBarActivity {
         }
 
         //deal request internet data logic
+        //key:c10d7f437c43bf19190ac874c33541bc
         private void updateMoies() {
+//            http://api.themoviedb.org/3/movie/popular?language=zh&api_key=[YOUR_API_KEY]
+//            http://api.themoviedb.org/3/movie/top_rated?language=zh&api_key=[YOUR_API_KEY]
+
         }
     }
 
