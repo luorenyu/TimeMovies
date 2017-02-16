@@ -63,6 +63,11 @@ public class MovieItem {
     private int vote_count;
     private List<Integer> genre_ids;
 
+    public MovieItem(String title, double score) {
+        this.title=title;
+        this.vote_average=score;
+    }
+
     public boolean isAdult() {
         return adult;
     }

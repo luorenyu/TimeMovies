@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,22 +19,24 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 public class MainActivity extends ActionBarActivity {
-
+    private final String LOG_TAG=MainActivity.class.getSimpleName();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (savedInstanceState!=null){
-            getSupportFragmentManager().beginTransaction().add(R.id.container, new MoiesFragment());
+        if (savedInstanceState==null){
+            getSupportFragmentManager().beginTransaction().add(R.id.container, new MoviesFragment()).commit();
         }
     }
     
     
-    public class MoiesFragment extends Fragment {
+    public static class MoviesFragment extends Fragment {
         private RecyclerView mRecyclerView;
-        private LinearLayoutManager mLayoutManager;
+        private GridLayoutManager mLayoutManager;
         private MyAdapter mAdapter;
-        public MoiesFragment() {
+        private int mColumNum =2;
+
+        public MoviesFragment() {
         }
 
         @Override
@@ -58,7 +60,7 @@ public class MainActivity extends ActionBarActivity {
                     return true;
                 case R.id.action_setting:
                     //跳转到设置界面
-                    Intent intent=new Intent(getApplicationContext(),SettingActivity.class);
+                    Intent intent=new Intent(getContext(),SettingActivity.class);
                     getActivity().startActivity(intent);
                     return true;
             }
@@ -71,21 +73,25 @@ public class MainActivity extends ActionBarActivity {
             View rootview = inflater.inflate(R.layout.fragment_main, null);
             mRecyclerView = (RecyclerView)rootview.findViewById(R.id.rv_movies);
             //创建默认的线性LayoutManager
-            mLayoutManager = new LinearLayoutManager(getContext());
+//            mLayoutManager = new LinearLayoutManager(getContext());
+            mLayoutManager = new GridLayoutManager(getContext(), mColumNum);
             mRecyclerView.setLayoutManager(mLayoutManager);
             //如果可以确定每个item的高度是固定的，设置这个选项可以提高性能
-            mRecyclerView.setHasFixedSize(true);
+//            mRecyclerView.setHasFixedSize(true);
             //创建并设置Adapter
             mAdapter = new MyAdapter(getMoiesFromNet());
             mRecyclerView.setAdapter(mAdapter);
 
 
-            return super.onCreateView(inflater, container, savedInstanceState);
+            return rootview;
 
         }
 
         private ArrayList<MovieItem> getMoiesFromNet() {
             ArrayList<MovieItem> moies= new ArrayList<>();
+            for (int i=0;i<10;i++){
+                moies.add(new MovieItem("lala land"+i,0.4+(double) i));
+            }
             return moies;
         }
 
@@ -94,7 +100,7 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
+    public static class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         public ArrayList<MovieItem> movies = null;
         public MyAdapter(ArrayList<MovieItem> movies) {
             this.movies = movies;
@@ -112,6 +118,7 @@ public class MainActivity extends ActionBarActivity {
             MovieItem movie=movies.get(position);
             viewHolder.mTv_score.setText(movie.getVote_average()+"");
             viewHolder.mTv_title.setText(movie.getTitle());
+            viewHolder.mIv_pic.setImageResource(R.mipmap.ic_launcher);
         }
         //获取数据的数量
         @Override
