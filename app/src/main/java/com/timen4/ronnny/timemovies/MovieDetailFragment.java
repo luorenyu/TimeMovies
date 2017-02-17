@@ -1,5 +1,8 @@
 package com.timen4.ronnny.timemovies;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -43,8 +46,11 @@ public class MovieDetailFragment extends Fragment {
             TextView tv_year = (TextView) rootview.findViewById(R.id.movie_year);
             tv_title.setText(mMovieItem.getTitle());
             tv_year.setText("上映时间："+mMovieItem.getRelease_date().substring(0,4));
-            tv_score.setText("评分："+mMovieItem.getVote_average());
+            tv_score.setText("评分："+mMovieItem.getVote_average()+"/10");
             tv_describle.setText(mMovieItem.getOverview());
+            if (!isOnline()){
+                Toast.makeText(getActivity(),"当前网络不可用，请链接网络后重试",Toast.LENGTH_SHORT).show();
+            }
             Picasso.with(getContext())
                     .load(IMAGE_BASE_URL+mMovieItem.getPoster_path())
                     .placeholder(R.mipmap.ic_launcher)
@@ -61,5 +67,15 @@ public class MovieDetailFragment extends Fragment {
                     });
         }
         return rootview;
+    }
+    /**
+     * 判断当前网络是否可用
+     * @return
+     */
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnected();
     }
 }

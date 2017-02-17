@@ -7,13 +7,13 @@
         android:background="@color/title_backgroud"
         android:gravity="center_vertical"
         android:layout_width="match_parent"
-        android:layout_height="130dp">
+        android:layout_height="100dp">
         <TextView
             android:id="@+id/movie_title"
             android:textColor="@color/white"
             android:text="教父"
-            android:layout_margin="20dp"
-            android:textSize="35sp"
+            android:layout_margin="15dp"
+            android:textSize="30sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
@@ -21,14 +21,21 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
-        <ImageView
-            android:gravity="center_horizontal"
+        <LinearLayout
+            android:gravity="center"
             android:layout_weight="1"
-            android:src="@mipmap/ic_launcher"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/movie_pic"/>
+            android:layout_height="120dp">
+            <ImageView
+                android:paddingTop="5dp"
+                android:src="@mipmap/ic_launcher"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/movie_pic"/>
+
+        </LinearLayout>
+
+
 
         <LinearLayout
             android:layout_weight="1"
@@ -38,16 +45,16 @@
             <TextView
                 android:id="@+id/movie_year"
                 android:layout_marginLeft="10dp"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="20dp"
                 android:text="1972"
-                android:textSize="27sp"
+                android:textSize="25sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
             <TextView
                 android:textColor="@color/red"
                 android:id="@+id/movie_score"
                 android:layout_margin="10dp"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:text="8.3/10"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>

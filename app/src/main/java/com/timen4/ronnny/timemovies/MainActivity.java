@@ -2,7 +2,11 @@ package com.timen4.ronnny.timemovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
@@ -31,6 +35,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
+import static com.timen4.ronnny.timemovies.BuildConfig.API_KEY;
+
 public class MainActivity extends ActionBarActivity {
     private final String LOG_TAG=MainActivity.class.getSimpleName();
     @Override
@@ -51,9 +57,6 @@ public class MainActivity extends ActionBarActivity {
         private boolean isPopular=true;//判断是获取热门信息还是高分信息
 
         private static final String BASE_URL = "http://api.themoviedb.org";
-
-
-        private static final String API_KEY = "c10d7f437c43bf19190ac874c33541bc";
 
         public MoviesFragment() {
         }
@@ -76,7 +79,6 @@ public class MainActivity extends ActionBarActivity {
             switch (itemId){
                 case R.id.action_refresh:
                     query();
-//                    updateMoies();
                     return true;
                 case R.id.action_setting:
                     //跳转到设置界面
@@ -85,6 +87,12 @@ public class MainActivity extends ActionBarActivity {
                     return true;
             }
             return super.onOptionsItemSelected(item);
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            query();
         }
 
         @Nullable
@@ -122,11 +130,27 @@ public class MainActivity extends ActionBarActivity {
             return moies;
         }
 
-//deal request internet data logic
+        /**
+         * 判断当前网络是否可用
+         * @return
+         */
+        public boolean isOnline() {
+            ConnectivityManager cm =
+                    (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo netInfo = cm.getActiveNetworkInfo();
+            return netInfo != null && netInfo.isConnected();
+        }
+
+
+        //deal request internet data logic
 //key:c10d7f437c43bf19190ac874c33541bc
 //            http://api.themoviedb.org/3/movie/popular?language=zh&api_key=[YOUR_API_KEY]
 //            http://api.themoviedb.org/3/movie/top_rated?language=zh&api_key=[YOUR_API_KEY]
         private void query(){
+            if (!isOnline()){
+                Toast.makeText(getActivity(),"当前网络不可用，请链接网络后重试",Toast.LENGTH_SHORT).show();
+                return;
+            }
             //1.创建Retrofit对象
             Retrofit retrofit = new Retrofit.Builder()
                     .addConverterFactory(GsonConverterFactory.create())//解析方法
@@ -134,9 +158,20 @@ public class MainActivity extends ActionBarActivity {
                     .build();
 
             //2.创建访问API的请求
-            PhoneService service = retrofit.create(PhoneService.class);
+            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String sort= sharedPrefs.getString(getString(R.string.pre_sort_key),getString(R.string.pre_popular_sort));
             String mLanguage="zh";
-            Call<MovieResults> call = service.getResult(mLanguage,API_KEY);
+            Call<MovieResults> call=null;
+            switch (sort){
+                case "popular":
+                    PopularService service = retrofit.create(PopularService.class);
+                    call = service.getResult(mLanguage,API_KEY);
+                    break;
+                case "top_rated":
+                    TopRateService topservice = retrofit.create(TopRateService.class);
+                    call = topservice.getResult(mLanguage, API_KEY);
+                    break;
+            }
 
             //3.发送请求
             call.enqueue(new Callback<MovieResults>() {
@@ -157,8 +192,15 @@ public class MainActivity extends ActionBarActivity {
             });
 
         }
-        public interface PhoneService {
+        public interface PopularService {
+
             @GET("/3/movie/popular")
+            Call<MovieResults> getResult(@Query("language") String language, @Query("api_key") String api_key);
+        }
+        public interface TopRateService {
+
+
+            @GET("/3/movie/top_rated")
             Call<MovieResults> getResult(@Query("language") String language, @Query("api_key") String api_key);
         }
     }
@@ -193,8 +235,8 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public void onBindViewHolder(ViewHolder viewHolder, int position) {
             final MovieResults.ResultsBean movie = movies.get(position);
-            viewHolder.mTv_score.setText("评分："+ movie.getVote_average()+"");
-            viewHolder.mTv_title.setText("影片："+ movie.getTitle()+"/10");
+            viewHolder.mTv_score.setText("评分："+ movie.getVote_average()+"/10");
+            viewHolder.mTv_title.setText("影片："+ movie.getTitle());
             //https://image.tmdb.org/t/p/w185/fMlSFgIB4Kr7YmuqNLHEWN2dkBG.jpg
             viewHolder.mIv_pic.setImageResource(R.mipmap.ic_launcher);
             Picasso.with(mContext)
@@ -208,7 +250,7 @@ public class MainActivity extends ActionBarActivity {
 
                         @Override
                         public void onError(){
-                            Toast.makeText(mContext,"信息暂时无法加载",Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(mContext,"信息暂时无法加载",Toast.LENGTH_SHORT).show();
                         }
                     });
             //将数据保存在itemView的Tag中，以便点击时进行获取
