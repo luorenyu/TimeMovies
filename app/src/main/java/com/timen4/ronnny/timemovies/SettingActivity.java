@@ -1,4 +1,4 @@
-package com.timen4.ronnny.timemoies;
+package com.timen4.ronnny.timemovies;
 
 import android.os.Bundle;
 import android.os.PersistableBundle;

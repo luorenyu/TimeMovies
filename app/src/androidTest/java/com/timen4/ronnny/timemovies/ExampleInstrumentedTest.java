@@ -1,4 +1,4 @@
-package com.timen4.ronnny.timemoies;
+package com.timen4.ronnny.timemovies;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

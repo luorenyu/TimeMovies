@@ -1,4 +1,4 @@
-package com.timen4.ronnny.timemoies;
+package com.timen4.ronnny.timemovies;
 
 import org.junit.Test;
 
