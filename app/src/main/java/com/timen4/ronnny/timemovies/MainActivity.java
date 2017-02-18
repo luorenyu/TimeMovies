@@ -112,6 +112,10 @@ public class MainActivity extends ActionBarActivity {
             mAdapter.setOnItemClickListener(new MyAdapter.OnRecyclerViewItemClickListener() {
                 @Override
                 public void onItemClick(View view, MovieResults.ResultsBean data) {
+                    if (isOnline()){
+                        Toast.makeText(getActivity(),"暂无网络连接，建议重新连接网络后重试",Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     Intent intent= new Intent(getActivity(),DetailActivity.class);
                     intent.putExtra("movieObject",data);
                     startActivity(intent);
@@ -125,7 +129,7 @@ public class MainActivity extends ActionBarActivity {
             query();
             ArrayList<MovieResults.ResultsBean> moies= new ArrayList<>();
             for (int i=0;i<4;i++){
-                moies.add(new MovieResults.ResultsBean("正在加载中。。。" + i,0.0));
+                moies.add(new MovieResults.ResultsBean("正在加载中。。。",0.0));
             }
             return moies;
         }
