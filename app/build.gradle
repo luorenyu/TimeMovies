@@ -10,6 +10,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
@@ -18,7 +19,7 @@ android {
         }
     }
     buildTypes.each {
-        it.buildConfigField 'String', 'API_KEY', '"c10d7f437c43bf19190ac874c33541bc"'
+        it.buildConfigField 'String', 'API_KEY', MyTheMovieDBApiToken
     }
 }
 
@@ -30,6 +31,8 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.1.1'
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:recyclerview-v7:25.0.+'
+    compile 'com.android.support:design:25.1.1'
+
 
     //引入retrofit和retrofit支持
     compile 'com.squareup.okhttp3:okhttp:3.2.0'

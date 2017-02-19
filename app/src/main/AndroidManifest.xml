@@ -18,8 +18,9 @@
             </intent-filter>
         </activity>
         <activity android:name="com.timen4.ronnny.timemovies.DetailActivity"
+                  android:theme="@style/Theme.Design.Light.NoActionBar"
                   android:parentActivityName="com.timen4.ronnny.timemovies.MainActivity"
-                  android:label="@string/movie_detail">
+            >
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                        android:value="com.timen4.ronnny.timemovies.MainActivity"/>
         </activity>

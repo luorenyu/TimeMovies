@@ -112,7 +112,7 @@ public class MainActivity extends ActionBarActivity {
             mAdapter.setOnItemClickListener(new MyAdapter.OnRecyclerViewItemClickListener() {
                 @Override
                 public void onItemClick(View view, MovieResults.ResultsBean data) {
-                    if (isOnline()){
+                    if (!isOnline() && data.getRelease_date()==null){
                         Toast.makeText(getActivity(),"暂无网络连接，建议重新连接网络后重试",Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -214,7 +214,7 @@ public class MainActivity extends ActionBarActivity {
     public static class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> implements View.OnClickListener {
         public ArrayList<MovieResults.ResultsBean> movies = null;
         private Context mContext;
-        private static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/w185";
+        private static final String IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
         private OnRecyclerViewItemClickListener mOnItemClickListener = null;
 
         public MyAdapter(ArrayList<MovieResults.ResultsBean> movies, Context context) {

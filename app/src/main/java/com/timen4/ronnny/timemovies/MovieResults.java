@@ -1,5 +1,8 @@
 package com.timen4.ronnny.timemovies;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -8,7 +11,7 @@ import java.util.List;
  * Date: 2017/2/17
  */
 
-public class MovieResults {
+public class MovieResults implements Parcelable{
     /**
      * page : 1
      * results : [{"adult":false,"backdrop_path":"/biN2sqExViEh8IYSJrXlNKjpjxx.jpg","genre_ids":[27],"id":14564,"original_language":"en","original_title":"Rings","overview":"故事设定在《美版午夜凶铃2》结尾的13年后，玛蒂尔达·鲁茨（Matilda Lutz）和阿历克斯·罗（Alex Roe）将在片中饰演一对情侣，后者因为看了录像带而开始疏远女友。","popularity":159.533213,"poster_path":"/AmbtHzH5kGt4dPTw2E4tBZQcLjz.jpg","release_date":"2017-02-01","title":"午夜凶铃3(美版)","video":false,"vote_average":5.1,"vote_count":216},{"adult":false,"backdrop_path":"/lubzBMQLLmG88CLQ4F3TxZr2Q7N.jpg","genre_ids":[12,16,35,10751],"id":328111,"original_language":"en","original_title":"The Secret Life of Pets","overview":"讲述了在纽约一幢热闹的公寓大楼里，有一群宠物，每天主人出门后、回家前这里就变成了它们的乐园：有的和其他宠物一起出去玩；有的聚在一起交流主人的糗事；还有的在不停捯饬自己的外貌，使自己看上去更可爱以便从主人那里要来更多的零食\u2026\u2026总之，宠物们每天的\u201c朝九晚五\u201d是他们一天中最自由、最惬意的时光。  　　在这群宠物中，有一只小猎犬是当仁不让的领袖，他叫麦克斯（Max），机智可爱，自认为是女主人生活的中心\u2014\u2014直到她从外带回家一只懒散、没有家教的杂种狗\u201c公爵\u201d（Duke）。  　　麦克斯和公爵人生观价值观都不一样，自然很难和平共处。但当它们一起流落纽约街头后，两人又必须抛弃分歧、共同阻止一只被主人抛弃的宠物兔\u201c雪球\u201d（Snowball）\u2014\u2014后者为了报复人类，准备组织一支遭弃宠物大军在晚饭前向人类发起总攻\u2026\u2026","popularity":109.400417,"poster_path":"/AgzX7mmCrQcSozvqWGwSpFAsEXj.jpg","release_date":"2016-06-18","title":"爱宠大机密","video":false,"vote_average":5.8,"vote_count":2224}]
@@ -20,6 +23,25 @@ public class MovieResults {
     private int total_pages;
     private int total_results;
     private List<ResultsBean> results;
+
+    protected MovieResults(Parcel in) {
+        page = in.readInt();
+        total_pages = in.readInt();
+        total_results = in.readInt();
+        results = in.createTypedArrayList(ResultsBean.CREATOR);
+    }
+
+    public static final Creator<MovieResults> CREATOR = new Creator<MovieResults>() {
+        @Override
+        public MovieResults createFromParcel(Parcel in) {
+            return new MovieResults(in);
+        }
+
+        @Override
+        public MovieResults[] newArray(int size) {
+            return new MovieResults[size];
+        }
+    };
 
     public int getPage() {
         return page;
@@ -53,7 +75,22 @@ public class MovieResults {
         this.results = results;
     }
 
-    public static class ResultsBean implements Serializable{
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(page);
+        dest.writeInt(total_pages);
+        dest.writeInt(total_results);
+        dest.writeTypedList(results);
+
+    }
+
+    public static class ResultsBean implements Parcelable{
         /**
          * adult : false
          * backdrop_path : /biN2sqExViEh8IYSJrXlNKjpjxx.jpg
@@ -90,6 +127,34 @@ public class MovieResults {
             this.title=title;
             this.vote_average=vote_average;
         }
+
+        protected ResultsBean(Parcel in) {
+            adult = in.readByte() != 0;
+            backdrop_path = in.readString();
+            id = in.readInt();
+            original_language = in.readString();
+            original_title = in.readString();
+            overview = in.readString();
+            popularity = in.readDouble();
+            poster_path = in.readString();
+            release_date = in.readString();
+            title = in.readString();
+            video = in.readByte() != 0;
+            vote_average = in.readDouble();
+            vote_count = in.readInt();
+        }
+
+        public static final Creator<ResultsBean> CREATOR = new Creator<ResultsBean>() {
+            @Override
+            public ResultsBean createFromParcel(Parcel in) {
+                return new ResultsBean(in);
+            }
+
+            @Override
+            public ResultsBean[] newArray(int size) {
+                return new ResultsBean[size];
+            }
+        };
 
         public boolean isAdult() {
             return adult;
@@ -201,6 +266,29 @@ public class MovieResults {
 
         public void setGenre_ids(List<Integer> genre_ids) {
             this.genre_ids = genre_ids;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+
+            dest.writeByte((byte) (adult ? 1 : 0));
+            dest.writeString(backdrop_path);
+            dest.writeInt(id);
+            dest.writeString(original_language);
+            dest.writeString(original_title);
+            dest.writeString(overview);
+            dest.writeDouble(popularity);
+            dest.writeString(poster_path);
+            dest.writeString(release_date);
+            dest.writeString(title);
+            dest.writeByte((byte) (video ? 1 : 0));
+            dest.writeDouble(vote_average);
+            dest.writeInt(vote_count);
         }
     }
 }
