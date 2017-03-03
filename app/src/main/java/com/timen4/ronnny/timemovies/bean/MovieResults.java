@@ -1,10 +1,22 @@
-package com.timen4.ronnny.timemovies;
+package com.timen4.ronnny.timemovies.bean;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.io.Serializable;
+import com.raizlabs.android.dbflow.annotation.Column;
+import com.raizlabs.android.dbflow.annotation.PrimaryKey;
+import com.raizlabs.android.dbflow.annotation.Table;
+import com.raizlabs.android.dbflow.annotation.provider.ContentUri;
+import com.raizlabs.android.dbflow.annotation.provider.TableEndpoint;
+import com.raizlabs.android.dbflow.structure.provider.BaseProviderModel;
+import com.raizlabs.android.dbflow.structure.provider.BaseSyncableProviderModel;
+import com.raizlabs.android.dbflow.structure.provider.ContentUtils;
+import com.timen4.ronnny.timemovies.MovieDetailFragment;
+import com.timen4.ronnny.timemovies.db.AppDatabase;
+
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by :luore
@@ -22,13 +34,13 @@ public class MovieResults implements Parcelable{
     private int page;
     private int total_pages;
     private int total_results;
-    private List<ResultsBean> results;
+    private List<MovieProviderModel> results;
 
     protected MovieResults(Parcel in) {
         page = in.readInt();
         total_pages = in.readInt();
         total_results = in.readInt();
-        results = in.createTypedArrayList(ResultsBean.CREATOR);
+        results = in.createTypedArrayList(MovieProviderModel.CREATOR);
     }
 
     public static final Creator<MovieResults> CREATOR = new Creator<MovieResults>() {
@@ -67,11 +79,11 @@ public class MovieResults implements Parcelable{
         this.total_results = total_results;
     }
 
-    public List<ResultsBean> getResults() {
+    public List<MovieProviderModel> getResults() {
         return results;
     }
 
-    public void setResults(List<ResultsBean> results) {
+    public void setResults(List<MovieProviderModel> results) {
         this.results = results;
     }
 
@@ -90,45 +102,70 @@ public class MovieResults implements Parcelable{
 
     }
 
-    public static class ResultsBean implements Parcelable{
-        /**
-         * adult : false
-         * backdrop_path : /biN2sqExViEh8IYSJrXlNKjpjxx.jpg
-         * genre_ids : [27]
-         * id : 14564
-         * original_language : en
-         * original_title : Rings
-         * overview : 故事设定在《美版午夜凶铃2》结尾的13年后，玛蒂尔达·鲁茨（Matilda Lutz）和阿历克斯·罗（Alex Roe）将在片中饰演一对情侣，后者因为看了录像带而开始疏远女友。
-         * popularity : 159.533213
-         * poster_path : /AmbtHzH5kGt4dPTw2E4tBZQcLjz.jpg
-         * release_date : 2017-02-01
-         * title : 午夜凶铃3(美版)
-         * video : false
-         * vote_average : 5.1
-         * vote_count : 216
-         */
+    /**
+     * adult : false
+     * backdrop_path : /biN2sqExViEh8IYSJrXlNKjpjxx.jpg
+     * genre_ids : [27]
+     * id : 14564
+     * original_language : en
+     * original_title : Rings
+     * overview : 故事设定在《美版午夜凶铃2》结尾的13年后，玛蒂尔达·鲁茨（Matilda Lutz）和阿历克斯·罗（Alex Roe）将在片中饰演一对情侣，后者因为看了录像带而开始疏远女友。
+     * popularity : 159.533213
+     * poster_path : /AmbtHzH5kGt4dPTw2E4tBZQcLjz.jpg
+     * release_date : 2017-02-01
+     * title : 午夜凶铃3(美版)
+     * video : false
+     * vote_average : 5.1
+     * vote_count : 216
+     */
+//    @TableEndpoint(name = MovieProviderModel.NAME, contentProvider = AppDatabase.class)
+    @Table(database = AppDatabase.class,name = MovieProviderModel.NAME)
+    public static class MovieProviderModel extends BaseProviderModel implements Parcelable{
 
-        private boolean adult;
-        private String backdrop_path;
+        public static final String NAME = "MovieProviderModel";
+
+//        @ContentUri(path = NAME, type = ContentUri.ContentType.VND_MULTIPLE + NAME)
+//        public static final Uri CONTENT_URI = ContentUtils.buildUriWithAuthority(AppDatabase.AUTHORITY);
+        @Column
+        @PrimaryKey
+        public Long k_id;
+        @Column
         private int id;
-        private String original_language;
-        private String original_title;
-        private String overview;
-        private double popularity;
-        private String poster_path;
-        private String release_date;
+        @Column
+        private boolean adult;
+        @Column
         private String title;
-        private boolean video;
+        @Column
+        private String original_language;
+        @Column
+        private String original_title;
+        @Column
+        private String poster_path;
+        @Column
+        private String backdrop_path;
+        @Column
         private double vote_average;
+        @Column
+        private String overview;
+        @Column
+        private double popularity;
+        @Column
+        private String release_date;
+        @Column
+        private boolean video;
+        @Column
         private int vote_count;
         private List<Integer> genre_ids;
 
-        public ResultsBean(String title, double vote_average) {
+        public MovieProviderModel() {
+
+        }
+        public MovieProviderModel(String title, double vote_average) {
             this.title=title;
             this.vote_average=vote_average;
         }
 
-        protected ResultsBean(Parcel in) {
+        protected MovieProviderModel(Parcel in) {
             adult = in.readByte() != 0;
             backdrop_path = in.readString();
             id = in.readInt();
@@ -144,17 +181,18 @@ public class MovieResults implements Parcelable{
             vote_count = in.readInt();
         }
 
-        public static final Creator<ResultsBean> CREATOR = new Creator<ResultsBean>() {
+        public static final Creator<MovieProviderModel> CREATOR = new Creator<MovieProviderModel>() {
             @Override
-            public ResultsBean createFromParcel(Parcel in) {
-                return new ResultsBean(in);
+            public MovieProviderModel createFromParcel(Parcel in) {
+                return new MovieProviderModel(in);
             }
 
             @Override
-            public ResultsBean[] newArray(int size) {
-                return new ResultsBean[size];
+            public MovieProviderModel[] newArray(int size) {
+                return new MovieProviderModel[size];
             }
         };
+
 
         public boolean isAdult() {
             return adult;
@@ -289,6 +327,26 @@ public class MovieResults implements Parcelable{
             dest.writeByte((byte) (video ? 1 : 0));
             dest.writeDouble(vote_average);
             dest.writeInt(vote_count);
+        }
+
+        @Override
+        public Uri getDeleteUri() {
+            return null;
+        }
+
+        @Override
+        public Uri getInsertUri() {
+            return null;
+        }
+
+        @Override
+        public Uri getUpdateUri() {
+            return null;
+        }
+
+        @Override
+        public Uri getQueryUri() {
+            return null;
         }
     }
 }

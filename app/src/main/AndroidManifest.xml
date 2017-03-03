@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
+        android:name=".TimeApp"
+        android:hardwareAccelerated="true"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -19,14 +21,16 @@
         </activity>
         <activity android:name="com.timen4.ronnny.timemovies.DetailActivity"
                   android:theme="@style/Theme.Design.Light.NoActionBar"
-                  android:parentActivityName="com.timen4.ronnny.timemovies.MainActivity"
-            >
+                  android:parentActivityName="com.timen4.ronnny.timemovies.MainActivity">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                        android:value="com.timen4.ronnny.timemovies.MainActivity"/>
         </activity>
-        <activity android:name="com.timen4.ronnny.timemovies.SettingActivity">
-
-        </activity>
+        <activity android:name="com.timen4.ronnny.timemovies.SettingActivity"/>
+        <provider
+            android:exported="true"
+            android:authorities="com.timen4.ronnny.timemovies.db"
+            android:name=".db.AppDatabase_Provider"/>
     </application>
+
 
 </manifest>

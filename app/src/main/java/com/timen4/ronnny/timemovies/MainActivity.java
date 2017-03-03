@@ -23,7 +23,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.raizlabs.android.dbflow.structure.provider.ContentUtils;
 import com.squareup.picasso.Picasso;
+import com.timen4.ronnny.timemovies.bean.MovieProviderModel_Table;
+import com.timen4.ronnny.timemovies.bean.MovieResults;
+import com.timen4.ronnny.timemovies.db.AppDatabase;
 
 import java.util.ArrayList;
 
@@ -111,7 +115,7 @@ public class MainActivity extends ActionBarActivity {
             mRecyclerView.setAdapter(mAdapter);
             mAdapter.setOnItemClickListener(new MyAdapter.OnRecyclerViewItemClickListener() {
                 @Override
-                public void onItemClick(View view, MovieResults.ResultsBean data) {
+                public void onItemClick(View view, MovieResults.MovieProviderModel data) {
                     if (!isOnline() && data.getRelease_date()==null){
                         Toast.makeText(getActivity(),"暂无网络连接，建议重新连接网络后重试",Toast.LENGTH_SHORT).show();
                         return;
@@ -125,11 +129,11 @@ public class MainActivity extends ActionBarActivity {
 
         }
 
-        private ArrayList<MovieResults.ResultsBean> getMoiesFromNet() {
+        private ArrayList<MovieResults.MovieProviderModel> getMoiesFromNet() {
             query();
-            ArrayList<MovieResults.ResultsBean> moies= new ArrayList<>();
+            ArrayList<MovieResults.MovieProviderModel> moies= new ArrayList<>();
             for (int i=0;i<4;i++){
-                moies.add(new MovieResults.ResultsBean("正在加载中。。。",0.0));
+                moies.add(new MovieResults.MovieProviderModel("正在加载中。。。",0.0));
             }
             return moies;
         }
@@ -184,6 +188,8 @@ public class MainActivity extends ActionBarActivity {
                     //4.处理结果
                     if (response.isSuccessful()){
                         ArrayList result= (ArrayList) response.body().getResults();
+                        ContentUtils.bulkInsert(getActivity().getContentResolver(), AppDatabase.MovieProviderModel.CONTENT_URI, MovieResults.MovieProviderModel.class,result);
+//                         ContentUtils.insert(getActivity().getContentResolver(), AppDatabase.MovieProviderModel.CONTENT_URI, result.get(0));
                         mAdapter.setDatas(result);
                         mAdapter.notifyDataSetChanged();
                     }
@@ -212,17 +218,17 @@ public class MainActivity extends ActionBarActivity {
 
 
     public static class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> implements View.OnClickListener {
-        public ArrayList<MovieResults.ResultsBean> movies = null;
+        public ArrayList<MovieResults.MovieProviderModel> movies = null;
         private Context mContext;
         private static final String IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
         private OnRecyclerViewItemClickListener mOnItemClickListener = null;
 
-        public MyAdapter(ArrayList<MovieResults.ResultsBean> movies, Context context) {
+        public MyAdapter(ArrayList<MovieResults.MovieProviderModel> movies, Context context) {
             this.mContext=context;
             this.movies = movies;
         }
 
-        public void setDatas(ArrayList<MovieResults.ResultsBean> movies){
+        public void setDatas(ArrayList<MovieResults.MovieProviderModel> movies){
             this.movies=movies;
         }
 
@@ -238,7 +244,7 @@ public class MainActivity extends ActionBarActivity {
         //将数据与界面进行绑定的操作
         @Override
         public void onBindViewHolder(ViewHolder viewHolder, int position) {
-            final MovieResults.ResultsBean movie = movies.get(position);
+            final MovieResults.MovieProviderModel movie = movies.get(position);
             viewHolder.mTv_score.setText("评分："+ movie.getVote_average()+"/10");
             viewHolder.mTv_title.setText("影片："+ movie.getTitle());
             //https://image.tmdb.org/t/p/w185/fMlSFgIB4Kr7YmuqNLHEWN2dkBG.jpg
@@ -270,7 +276,7 @@ public class MainActivity extends ActionBarActivity {
         public void onClick(View view) {
             if (mOnItemClickListener != null) {
                 //注意这里使用getTag方法获取数据
-                mOnItemClickListener.onItemClick(view,(MovieResults.ResultsBean)view.getTag());
+                mOnItemClickListener.onItemClick(view,(MovieResults.MovieProviderModel)view.getTag());
             }
         }
 
@@ -294,7 +300,7 @@ public class MainActivity extends ActionBarActivity {
 
         //define interface
         public static interface OnRecyclerViewItemClickListener {
-            void onItemClick(View view , MovieResults.ResultsBean data);
+            void onItemClick(View view , MovieResults.MovieProviderModel data);
         }
     }
 
