@@ -5,25 +5,23 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.raizlabs.android.dbflow.annotation.Column;
+import com.raizlabs.android.dbflow.annotation.ColumnIgnore;
+import com.raizlabs.android.dbflow.annotation.ConflictAction;
+import com.raizlabs.android.dbflow.annotation.ForeignKey;
 import com.raizlabs.android.dbflow.annotation.PrimaryKey;
 import com.raizlabs.android.dbflow.annotation.Table;
-import com.raizlabs.android.dbflow.annotation.provider.ContentUri;
-import com.raizlabs.android.dbflow.annotation.provider.TableEndpoint;
+import com.raizlabs.android.dbflow.annotation.Unique;
 import com.raizlabs.android.dbflow.structure.provider.BaseProviderModel;
-import com.raizlabs.android.dbflow.structure.provider.BaseSyncableProviderModel;
-import com.raizlabs.android.dbflow.structure.provider.ContentUtils;
-import com.timen4.ronnny.timemovies.MovieDetailFragment;
 import com.timen4.ronnny.timemovies.db.AppDatabase;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by :luore
  * Date: 2017/2/17
  */
 
-public class MovieResults implements Parcelable{
+public class MovieResult implements Parcelable{
     /**
      * page : 1
      * results : [{"adult":false,"backdrop_path":"/biN2sqExViEh8IYSJrXlNKjpjxx.jpg","genre_ids":[27],"id":14564,"original_language":"en","original_title":"Rings","overview":"故事设定在《美版午夜凶铃2》结尾的13年后，玛蒂尔达·鲁茨（Matilda Lutz）和阿历克斯·罗（Alex Roe）将在片中饰演一对情侣，后者因为看了录像带而开始疏远女友。","popularity":159.533213,"poster_path":"/AmbtHzH5kGt4dPTw2E4tBZQcLjz.jpg","release_date":"2017-02-01","title":"午夜凶铃3(美版)","video":false,"vote_average":5.1,"vote_count":216},{"adult":false,"backdrop_path":"/lubzBMQLLmG88CLQ4F3TxZr2Q7N.jpg","genre_ids":[12,16,35,10751],"id":328111,"original_language":"en","original_title":"The Secret Life of Pets","overview":"讲述了在纽约一幢热闹的公寓大楼里，有一群宠物，每天主人出门后、回家前这里就变成了它们的乐园：有的和其他宠物一起出去玩；有的聚在一起交流主人的糗事；还有的在不停捯饬自己的外貌，使自己看上去更可爱以便从主人那里要来更多的零食\u2026\u2026总之，宠物们每天的\u201c朝九晚五\u201d是他们一天中最自由、最惬意的时光。  　　在这群宠物中，有一只小猎犬是当仁不让的领袖，他叫麦克斯（Max），机智可爱，自认为是女主人生活的中心\u2014\u2014直到她从外带回家一只懒散、没有家教的杂种狗\u201c公爵\u201d（Duke）。  　　麦克斯和公爵人生观价值观都不一样，自然很难和平共处。但当它们一起流落纽约街头后，两人又必须抛弃分歧、共同阻止一只被主人抛弃的宠物兔\u201c雪球\u201d（Snowball）\u2014\u2014后者为了报复人类，准备组织一支遭弃宠物大军在晚饭前向人类发起总攻\u2026\u2026","popularity":109.400417,"poster_path":"/AgzX7mmCrQcSozvqWGwSpFAsEXj.jpg","release_date":"2016-06-18","title":"爱宠大机密","video":false,"vote_average":5.8,"vote_count":2224}]
@@ -34,24 +32,24 @@ public class MovieResults implements Parcelable{
     private int page;
     private int total_pages;
     private int total_results;
-    private List<MovieProviderModel> results;
+    private List<MovieInfo> results;
 
-    protected MovieResults(Parcel in) {
+    protected MovieResult(Parcel in) {
         page = in.readInt();
         total_pages = in.readInt();
         total_results = in.readInt();
-        results = in.createTypedArrayList(MovieProviderModel.CREATOR);
+        results = in.createTypedArrayList(MovieInfo.CREATOR);
     }
 
-    public static final Creator<MovieResults> CREATOR = new Creator<MovieResults>() {
+    public static final Creator<MovieResult> CREATOR = new Creator<MovieResult>() {
         @Override
-        public MovieResults createFromParcel(Parcel in) {
-            return new MovieResults(in);
+        public MovieResult createFromParcel(Parcel in) {
+            return new MovieResult(in);
         }
 
         @Override
-        public MovieResults[] newArray(int size) {
-            return new MovieResults[size];
+        public MovieResult[] newArray(int size) {
+            return new MovieResult[size];
         }
     };
 
@@ -79,11 +77,11 @@ public class MovieResults implements Parcelable{
         this.total_results = total_results;
     }
 
-    public List<MovieProviderModel> getResults() {
+    public List<MovieInfo> getResults() {
         return results;
     }
 
-    public void setResults(List<MovieProviderModel> results) {
+    public void setResults(List<MovieInfo> results) {
         this.results = results;
     }
 
@@ -118,54 +116,73 @@ public class MovieResults implements Parcelable{
      * vote_average : 5.1
      * vote_count : 216
      */
-//    @TableEndpoint(name = MovieProviderModel.NAME, contentProvider = AppDatabase.class)
-    @Table(database = AppDatabase.class,name = MovieProviderModel.NAME)
-    public static class MovieProviderModel extends BaseProviderModel implements Parcelable{
+//    @TableEndpoint(name = MovieInfo.NAME, contentProvider = AppDatabase.class)
 
-        public static final String NAME = "MovieProviderModel";
+    @Table(database = AppDatabase.class,name = MovieInfo.NAME,insertConflict = ConflictAction.REPLACE)
+    public static class MovieInfo extends BaseProviderModel implements Parcelable{
+
+        public static final String NAME = "MovieInfo";
 
 //        @ContentUri(path = NAME, type = ContentUri.ContentType.VND_MULTIPLE + NAME)
 //        public static final Uri CONTENT_URI = ContentUtils.buildUriWithAuthority(AppDatabase.AUTHORITY);
+        @Column()
+        public int _id;
+
+        @ForeignKey(tableClass = SortResult.class)
         @Column
-        @PrimaryKey
-        public Long k_id;
-        @Column
+        public int sort;
+
+        @PrimaryKey()
+        @Unique(onUniqueConflict = ConflictAction.REPLACE)
         private int id;
+
         @Column
         private boolean adult;
+
         @Column
         private String title;
+
         @Column
         private String original_language;
+
         @Column
         private String original_title;
+
         @Column
         private String poster_path;
+
         @Column
         private String backdrop_path;
+
         @Column
         private double vote_average;
+
         @Column
         private String overview;
+
         @Column
         private double popularity;
+
         @Column
         private String release_date;
+
         @Column
         private boolean video;
+
         @Column
         private int vote_count;
+
         private List<Integer> genre_ids;
 
-        public MovieProviderModel() {
+        public MovieInfo() {
 
         }
-        public MovieProviderModel(String title, double vote_average) {
+        public MovieInfo(String title, double vote_average) {
             this.title=title;
             this.vote_average=vote_average;
         }
 
-        protected MovieProviderModel(Parcel in) {
+        protected MovieInfo(Parcel in) {
             adult = in.readByte() != 0;
             backdrop_path = in.readString();
             id = in.readInt();
@@ -181,15 +198,15 @@ public class MovieResults implements Parcelable{
             vote_count = in.readInt();
         }
 
-        public static final Creator<MovieProviderModel> CREATOR = new Creator<MovieProviderModel>() {
+        public static final Creator<MovieInfo> CREATOR = new Creator<MovieInfo>() {
             @Override
-            public MovieProviderModel createFromParcel(Parcel in) {
-                return new MovieProviderModel(in);
+            public MovieInfo createFromParcel(Parcel in) {
+                return new MovieInfo(in);
             }
 
             @Override
-            public MovieProviderModel[] newArray(int size) {
-                return new MovieProviderModel[size];
+            public MovieInfo[] newArray(int size) {
+                return new MovieInfo[size];
             }
         };
 
@@ -296,6 +313,14 @@ public class MovieResults implements Parcelable{
 
         public void setVote_count(int vote_count) {
             this.vote_count = vote_count;
+        }
+
+        public int getSort() {
+            return sort;
+        }
+
+        public void setSort(int sort_id) {
+            this.sort = sort_id;
         }
 
         public List<Integer> getGenre_ids() {

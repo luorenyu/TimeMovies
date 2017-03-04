@@ -17,7 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
-import com.timen4.ronnny.timemovies.bean.MovieResults;
+import com.timen4.ronnny.timemovies.bean.MovieResult;
 
 /**
  * Created by :luore
@@ -42,7 +42,7 @@ public class MovieDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootview =inflater.inflate(R.layout.fragment_detail,container,false);
-        MovieResults.MovieProviderModel mMovieItem = getActivity().getIntent().getParcelableExtra("movieObject");
+        MovieResult.MovieInfo mMovieItem = getActivity().getIntent().getParcelableExtra("movieObject");
 
         //给页面设置工具栏
         final Toolbar toolbar = (Toolbar) rootview.findViewById(R.id.toolbar);

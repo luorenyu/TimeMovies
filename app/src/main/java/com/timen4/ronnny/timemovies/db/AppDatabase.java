@@ -27,7 +27,7 @@ public class AppDatabase {
     @TableEndpoint(name = MovieProviderModel.ENDPOINT,contentProvider = AppDatabase.class)
     public static class MovieProviderModel {
 
-        public static final String ENDPOINT = "MovieProviderModel";
+        public static final String ENDPOINT = "MovieInfo";
 
         private static Uri buildUri(String... paths) {
             Uri.Builder builder = Uri.parse(BASE_CONTENT_URI + AUTHORITY).buildUpon();
@@ -39,8 +39,63 @@ public class AppDatabase {
 
         @ContentUri(path = MovieProviderModel.ENDPOINT,
                 type = ContentUri.ContentType.VND_MULTIPLE + ENDPOINT)
+
         public static Uri CONTENT_URI = buildUri(ENDPOINT);
 
+    }
+
+    @TableEndpoint(name = SortProviderModel.ENDPOINT,contentProvider = AppDatabase.class)
+    public static class SortProviderModel{
+        public static final String ENDPOINT = "Sort";
+
+        private static Uri buildUri(String... paths) {
+            Uri.Builder builder = Uri.parse(BASE_CONTENT_URI + AUTHORITY).buildUpon();
+            for (String path : paths) {
+                builder.appendPath(path);
+            }
+            return builder.build();
+        }
+
+        @ContentUri(path = SortProviderModel.ENDPOINT,
+                type = ContentUri.ContentType.VND_MULTIPLE + ENDPOINT)
+
+        public static Uri CONTENT_URI = buildUri(ENDPOINT);
+
+    }
+    @TableEndpoint(name = ReviewProviderModel.ENDPOINT,contentProvider = AppDatabase.class)
+    public static class ReviewProviderModel{
+        public static final String ENDPOINT = "MovieReview";
+
+        private static Uri buildUri(String... paths) {
+            Uri.Builder builder = Uri.parse(BASE_CONTENT_URI + AUTHORITY).buildUpon();
+            for (String path : paths) {
+                builder.appendPath(path);
+            }
+            return builder.build();
+        }
+
+        @ContentUri(path = ReviewProviderModel.ENDPOINT,
+                type = ContentUri.ContentType.VND_MULTIPLE + ENDPOINT)
+
+        public static Uri CONTENT_URI = buildUri(ENDPOINT);
+    }
+
+    @TableEndpoint(name = TrailerProvidermodel.ENDPOINT,contentProvider = AppDatabase.class)
+    public static class TrailerProvidermodel{
+        public static final String ENDPOINT = "MovieTrailer";
+
+        private static Uri buildUri(String... paths) {
+            Uri.Builder builder = Uri.parse(BASE_CONTENT_URI + AUTHORITY).buildUpon();
+            for (String path : paths) {
+                builder.appendPath(path);
+            }
+            return builder.build();
+        }
+
+        @ContentUri(path = TrailerProvidermodel.ENDPOINT,
+                type = ContentUri.ContentType.VND_MULTIPLE + ENDPOINT)
+
+        public static Uri CONTENT_URI = buildUri(ENDPOINT);
     }
 
 }
