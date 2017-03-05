@@ -22,7 +22,16 @@ android {
     buildTypes.each {
         it.buildConfigField 'String', 'API_KEY', MyTheMovieDBApiToken
     }
+
+    packagingOptions {
+        exclude 'META-INF/NOTICE' // will not include NOTICE file
+        exclude 'META-INF/LICENSE' // will not include LICENSE file
+    }
 }
+
+
+
+
 def dbflow_version = "4.0.0-beta5"
 
 dependencies {
@@ -41,6 +50,11 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
+
+    //引入RxJava和rxAndroid
+    compile 'io.reactivex:rxjava:1.1.6'
+    compile 'io.reactivex:rxandroid:1.1.0'
+
     //facebook的图片加载框架
     compile 'com.squareup.picasso:picasso:2.5.2'
     //引入DBFlow 构建数据库以及生成contentProvider

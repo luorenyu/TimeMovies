@@ -29,6 +29,11 @@ public class AppDatabase {
 
         public static final String ENDPOINT = "MovieInfo";
 
+        public static final String MOVIE_TITLE="title";
+        public static final String MOVIE_SCORE="vote_average";
+        public static final String MOVIE_PIC="poster_path";
+
+
         private static Uri buildUri(String... paths) {
             Uri.Builder builder = Uri.parse(BASE_CONTENT_URI + AUTHORITY).buildUpon();
             for (String path : paths) {

@@ -1,5 +1,6 @@
 package com.timen4.ronnny.timemovies.bean;
 
+import com.raizlabs.android.dbflow.annotation.ConflictAction;
 import com.raizlabs.android.dbflow.annotation.ForeignKey;
 import com.raizlabs.android.dbflow.annotation.PrimaryKey;
 import com.raizlabs.android.dbflow.annotation.Table;
@@ -35,7 +36,8 @@ public class TrailerResult {
     public void setResults(List<MovieTrailer> results) {
         this.results = results;
     }
-    @Table(database = AppDatabase.class,name = MovieTrailer.NAME,allFields = true)
+
+    @Table(database = AppDatabase.class,name = MovieTrailer.NAME,allFields = true,insertConflict = ConflictAction.IGNORE)
     public static class MovieTrailer {
         public static final String NAME="MovieTrailer";
         /**
@@ -49,10 +51,10 @@ public class TrailerResult {
          * type （类型）: Trailer
          */
         @PrimaryKey
-        @Unique
+        @Unique(onUniqueConflict = ConflictAction.IGNORE)
         private String id;
         @ForeignKey(tableClass = MovieResult.MovieInfo.class)
-        public int Movie;
+        public int movie;
         private String iso_639_1;
         private String iso_3166_1;
         private String key;

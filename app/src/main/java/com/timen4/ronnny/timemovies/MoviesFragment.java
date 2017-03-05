@@ -2,6 +2,7 @@ package com.timen4.ronnny.timemovies;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -16,6 +17,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.raizlabs.android.dbflow.runtime.FlowContentObserver;
+import com.raizlabs.android.dbflow.sql.language.ConditionGroup;
+import com.raizlabs.android.dbflow.sql.language.SQLCondition;
+import com.raizlabs.android.dbflow.structure.BaseModel;
+import com.raizlabs.android.dbflow.structure.Model;
 import com.raizlabs.android.dbflow.structure.provider.ContentUtils;
 import com.timen4.ronnny.timemovies.Helper.DataHelper;
 import com.timen4.ronnny.timemovies.bean.MovieResult;
@@ -29,14 +35,15 @@ import java.util.List;
  * Created by ronny on 2017/3/4.
  */
 
-public class MoviesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Object> {
+public class MoviesFragment extends Fragment {
     private DataHelper mDataHelper;
     private RecyclerView mRecyclerView;
     private GridLayoutManager mLayoutManager;
-    private MainActivity.MyAdapter mAdapter;
+    private MoviesAdapter mAdapter;
     private int mColumNum =2;
     private boolean isPopular=true;//判断是获取热门信息还是高分信息
     private int MOVIES_LOADER =0;
+    private FlowContentObserver mMovieInfoObserver;
 
 
     public MoviesFragment() {
@@ -47,6 +54,8 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         mDataHelper=new DataHelper(getContext());
+        mMovieInfoObserver= new FlowContentObserver();
+        mMovieInfoObserver.registerForContentChanges(getActivity(), MovieResult.MovieInfo.class);
     }
 
     @Override
@@ -79,18 +88,16 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View rootview = inflater.inflate(R.layout.fragment_main, null);
-        mRecyclerView = (RecyclerView)rootview.findViewById(R.id.rv_movies);
+        View rootView = inflater.inflate(R.layout.fragment_main, null);
+        mRecyclerView = (RecyclerView)rootView.findViewById(R.id.rv_movies);
         //创建默认的线性LayoutManager
 //            mLayoutManager = new LinearLayoutManager(getContext());
         mLayoutManager = new GridLayoutManager(getContext(), mColumNum);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        //如果可以确定每个item的高度是固定的，设置这个选项可以提高性能
-//            mRecyclerView.setHasFixedSize(true);
         //创建并设置Adapter
-        mAdapter = new MainActivity.MyAdapter(FillDataFromDB(),getContext());
+        mAdapter = new MoviesAdapter(FillDataFromDB(),getContext());
         mRecyclerView.setAdapter(mAdapter);
-        mAdapter.setOnItemClickListener(new MainActivity.MyAdapter.OnRecyclerViewItemClickListener() {
+        mAdapter.setOnItemClickListener(new MoviesAdapter.OnRecyclerViewItemClickListener() {
             @Override
             public void onItemClick(View view, MovieResult.MovieInfo data) {
                 if (!Utility.checkNetIsConnected(getActivity()) && data.getRelease_date()==null){
@@ -102,18 +109,24 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
                 startActivity(intent);
             }
         });
-        return rootview;
+        mMovieInfoObserver.addModelChangeListener(new FlowContentObserver.OnModelStateChangedListener() {
+            @Override
+            public void onModelStateChanged(@Nullable Class<?> table, BaseModel.Action action, @NonNull SQLCondition[] primaryKeyValues) {
+                mAdapter.setDatas(FillDataFromDB());
+                mAdapter.notifyDataSetChanged();
+            }
+        });
+        return rootView;
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        getLoaderManager().initLoader(MOVIES_LOADER,null,this);
-        super.onActivityCreated(savedInstanceState);
-
+    public void onDestroy() {
+        super.onDestroy();
+        mMovieInfoObserver.unregisterForContentChanges(getActivity());
     }
 
     private List<MovieResult.MovieInfo> FillDataFromDB() {
-        boolean isFirst = Utility.checkNetIsConnected(getActivity());
+        boolean isFirst = Utility.isFirstInApp(getActivity());
         List<MovieResult.MovieInfo> movies= new ArrayList();
         if (isFirst){
             mDataHelper.pullMovieBicInfo(getActivity());
@@ -121,38 +134,10 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
                 movies.add(new MovieResult.MovieInfo("正在加载中。。。",0.0));
             }
         }else{
-             movies = ContentUtils.queryList(AppDatabase.MovieProviderModel.CONTENT_URI, MovieResult.MovieInfo.class, null, null,new String[]{});
+            movies = ContentUtils.queryList(AppDatabase.MovieProviderModel.CONTENT_URI, MovieResult.MovieInfo.class, ConditionGroup.clause(), null,new String[]{});
         }
         return movies;
     }
 
-
-    @Override
-    public Loader<Object> onCreateLoader(int id, Bundle args) {
-//        String sort = Utility.getPreferedSort(getActivity());
-//
-//        // SortResult order:  Ascending, by date.
-//        String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
-//        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
-//                locationSetting, System.currentTimeMillis());
-//
-//        return new CursorLoader(getActivity(),
-//                weatherForLocationUri,
-//                FORECAST_COLUMNS,
-//                null,
-//                null,
-//                sortOrder);
-        return null;
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Object> loader, Object data) {
-
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Object> loader) {
-
-    }
 }
 

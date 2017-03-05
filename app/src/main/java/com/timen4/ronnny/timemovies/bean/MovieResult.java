@@ -125,8 +125,8 @@ public class MovieResult implements Parcelable{
 
 //        @ContentUri(path = NAME, type = ContentUri.ContentType.VND_MULTIPLE + NAME)
 //        public static final Uri CONTENT_URI = ContentUtils.buildUriWithAuthority(AppDatabase.AUTHORITY);
-        @Column()
-        public int _id;
+//        @Column()
+//        public int _id;
 
         @ForeignKey(tableClass = SortResult.class)
         @Column
