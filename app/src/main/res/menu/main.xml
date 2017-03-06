@@ -7,5 +7,7 @@
     <item android:id="@+id/action_setting"
           android:title="@string/main_menu_setting"
           app:showAsAction="never"/>
-
+    <item android:id="@+id/action_favorite"
+        android:title="@string/main_menu_favorite"
+        app:showAsAction="never"/>
 </menu>

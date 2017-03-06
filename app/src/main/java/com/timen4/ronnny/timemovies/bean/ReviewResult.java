@@ -68,6 +68,7 @@ public class ReviewResult {
     public void setResults(List<MovieReview> results) {
         this.results = results;
     }
+
     @Table(database = AppDatabase.class,name = MovieReview.NAME,insertConflict = ConflictAction.IGNORE)
     public static class MovieReview {
         public static final String NAME="MovieReview";
@@ -79,13 +80,14 @@ public class ReviewResult {
          * url : https://www.themoviedb.org/review/57a814dc9251415cfb00309a
          */
 
-        @PrimaryKey
-        @Unique(onUniqueConflict = ConflictAction.IGNORE)
-        @Column
-        public long _id;
+
+//        @Column
+//        public long _id;
         @Column
         @ForeignKey(tableClass = MovieResult.MovieInfo.class)
         public int movie;
+        @PrimaryKey
+        @Unique(onUniqueConflict = ConflictAction.IGNORE)
         @Column
         private String id;
         @Column

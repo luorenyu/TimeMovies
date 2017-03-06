@@ -1,12 +1,16 @@
 package com.timen4.ronnny.timemovies.Helper;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.raizlabs.android.dbflow.sql.language.ConditionGroup;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.raizlabs.android.dbflow.sql.language.Where;
 import com.raizlabs.android.dbflow.structure.provider.ContentUtils;
+import com.timen4.ronnny.timemovies.bean.DetailResult;
+import com.timen4.ronnny.timemovies.bean.MovieInfo_Table;
 import com.timen4.ronnny.timemovies.bean.MovieResult;
 import com.timen4.ronnny.timemovies.bean.ReviewResult;
 import com.timen4.ronnny.timemovies.bean.SortResult;
@@ -18,7 +22,6 @@ import com.timen4.ronnny.timemovies.utils.Utility;
 import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -28,13 +31,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
-import retrofit2.http.Url;
 import rx.Observable;
-import rx.Scheduler;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 import static com.timen4.ronnny.timemovies.BuildConfig.API_KEY;
 
@@ -51,7 +48,7 @@ public class DataHelper {
 
     private  Context mContext;
 
-    private static final String BASE_URL = "http://api.themoviedb.org";
+    private static final String BASE_URL = "http://api.themoviedb.org/";
 
     private static final String POPULAR="popular";
     private static final String TOP_RATED="top_rated";
@@ -124,10 +121,43 @@ public class DataHelper {
                     //first inert the the way of sort
                     ContentUtils.insert(context.getContentResolver(), AppDatabase.SortProviderModel.CONTENT_URI,sortResult);
                     Where<SortResult> resultWhere2 = SQLite.select().from(SortResult.class).where(SortResult_Table.sort.eq(sort));
-                    for (MovieResult.MovieInfo movie :result) {
+                    for (final MovieResult.MovieInfo movie :result) {
                         movie.sort=resultWhere2.querySingle()._id;
+                        MovieResult.MovieInfo movieInfo1 = ContentUtils.querySingle(context.getContentResolver(),
+                                AppDatabase.MovieProviderModel.CONTENT_URI,
+                                MovieResult.MovieInfo.class,
+                                ConditionGroup.clause().and(MovieInfo_Table.id.is(movie.getId())), null);
+                        if (movieInfo1!=null&&movieInfo1.getTime()!=0){
+                            continue;
+                        }
                         ContentUtils.insert(context.getContentResolver(), AppDatabase.MovieProviderModel.CONTENT_URI,movie);
                         Log.e(TAG,movie.getId()+movie.getTitle());
+
+                        Call<DetailResult> movieCall = service.getMovieDetail(movie.getId(), API_KEY);
+                        movieCall.enqueue(new Callback<DetailResult>() {
+                            @Override
+                            public void onResponse(Call<DetailResult> call, Response<DetailResult> response) {
+                                if (response.isSuccessful()){
+                                    DetailResult detailResult = response.body();
+                                    MovieResult.MovieInfo movieInfo = ContentUtils.querySingle(context.getContentResolver(),
+                                            AppDatabase.MovieProviderModel.CONTENT_URI,
+                                            MovieResult.MovieInfo.class,
+                                            ConditionGroup.clause().and(MovieInfo_Table.id.is(detailResult.getId())), null);
+                                    if (detailResult==null||movieInfo==null){
+                                        return;
+                                    }
+                                    movieInfo.setTime(detailResult.getRuntime());
+                                    int update = ContentUtils.update(context.getContentResolver(), AppDatabase.MovieProviderModel.CONTENT_URI, movieInfo);
+                                    Log.e(TAG,"update 的数量"+update);
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<DetailResult> call, Throwable t) {
+                                Log.e(TAG,"更新movieInfo失败:"+t.toString());
+                            }
+                        });
+
                         Call<ReviewResult> reviewCall = service.getMovieReview(movie.getId(), API_KEY);
                         //request movie's reviews
                         reviewCall.enqueue(new Callback<ReviewResult>() {
@@ -152,6 +182,7 @@ public class DataHelper {
                                 Log.e("request movieReview failed",t.toString());
                             }
                         });
+
                         //request movie's trailers
                         final Call<TrailerResult> trailerCall = service.getMovieTrailer(movie.getId(), API_KEY);
                         trailerCall.enqueue(new Callback<TrailerResult>() {
@@ -203,6 +234,10 @@ public class DataHelper {
 
         @GET("3/movie/{movieId}/videos")
         Call<TrailerResult> getMovieTrailer(@Path("movieId") int movieId,@Query("api_key") String api_key);
+
+        //http://api.themoviedb.org/3/movie/297761?api_key=
+        @GET("3/movie/{movie_id}")
+        Call<DetailResult> getMovieDetail(@Path("movie_id") int movieId, @Query("api_key") String pai_key);
 
     }
 

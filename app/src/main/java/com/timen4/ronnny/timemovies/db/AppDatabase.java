@@ -32,6 +32,7 @@ public class AppDatabase {
         public static final String MOVIE_TITLE="title";
         public static final String MOVIE_SCORE="vote_average";
         public static final String MOVIE_PIC="poster_path";
+        public static final String MOVIE_POPULAR="popularity";
 
 
         private static Uri buildUri(String... paths) {

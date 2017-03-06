@@ -7,6 +7,11 @@
     <string name="pre_sort_key">sort_id</string>
     <string name="pre_popular_sort">popular</string>
     <string name="pre_top_rated_sort">top_rated</string>
-    <string name="pre_popular_sort_label">受欢迎度</string>
-    <string name="pre_top_rated_sort_label">按评分</string>
+    <string name="pre_popular_sort_label">热门</string>
+    <string name="pre_top_rated_sort_label">高分</string>
+    <string name="trailer">预告片</string>
+    <string name="movie_comment">影评</string>
+    <string name="no_comment_tip">暂时还没有关于该影片的影评！</string>
+    <string name="no_trailer_tip">暂时还没有关于该影片的预告片！</string>
+    <string name="main_menu_favorite">我的收藏</string>
 </resources>

@@ -172,6 +172,12 @@ public class MovieResult implements Parcelable{
         @Column
         private int vote_count;
 
+        @Column
+        private int time;
+
+        @Column(defaultValue = "false")
+        private boolean favorite;
+
         private List<Integer> genre_ids;
 
         public MovieInfo() {
@@ -196,6 +202,8 @@ public class MovieResult implements Parcelable{
             video = in.readByte() != 0;
             vote_average = in.readDouble();
             vote_count = in.readInt();
+            time=in.readInt();
+            favorite=in.readByte()!=0;
         }
 
         public static final Creator<MovieInfo> CREATOR = new Creator<MovieInfo>() {
@@ -331,6 +339,22 @@ public class MovieResult implements Parcelable{
             this.genre_ids = genre_ids;
         }
 
+        public int getTime() {
+            return time;
+        }
+
+        public void setTime(int time) {
+            this.time = time;
+        }
+
+        public boolean isFavorite() {
+            return favorite;
+        }
+
+        public void setFavorite(boolean favorite) {
+            this.favorite = favorite;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -352,6 +376,8 @@ public class MovieResult implements Parcelable{
             dest.writeByte((byte) (video ? 1 : 0));
             dest.writeDouble(vote_average);
             dest.writeInt(vote_count);
+            dest.writeInt(time);
+            dest.writeByte((byte) (favorite ? 1 : 0));
         }
 
         @Override

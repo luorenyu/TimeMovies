@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -21,9 +19,9 @@ import com.raizlabs.android.dbflow.runtime.FlowContentObserver;
 import com.raizlabs.android.dbflow.sql.language.ConditionGroup;
 import com.raizlabs.android.dbflow.sql.language.SQLCondition;
 import com.raizlabs.android.dbflow.structure.BaseModel;
-import com.raizlabs.android.dbflow.structure.Model;
 import com.raizlabs.android.dbflow.structure.provider.ContentUtils;
 import com.timen4.ronnny.timemovies.Helper.DataHelper;
+import com.timen4.ronnny.timemovies.bean.MovieInfo_Table;
 import com.timen4.ronnny.timemovies.bean.MovieResult;
 import com.timen4.ronnny.timemovies.db.AppDatabase;
 import com.timen4.ronnny.timemovies.utils.Utility;
@@ -76,6 +74,16 @@ public class MoviesFragment extends Fragment {
                 Intent intent=new Intent(getContext(),SettingActivity.class);
                 getActivity().startActivity(intent);
                 return true;
+            case R.id.action_favorite:
+                List<MovieResult.MovieInfo> movieInfoList = FillDataFromDB(true);
+                if (movieInfoList.size()==0){
+                    Toast.makeText(getActivity(),"您还没有收藏数据，快去收藏吧",Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+                mAdapter.setData(FillDataFromDB(true));
+                mAdapter.notifyDataSetChanged();
+                return true;
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -83,6 +91,8 @@ public class MoviesFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        mAdapter.setData(FillDataFromDB(false));
+        mAdapter.notifyDataSetChanged();
     }
 
     @Nullable
@@ -94,8 +104,16 @@ public class MoviesFragment extends Fragment {
 //            mLayoutManager = new LinearLayoutManager(getContext());
         mLayoutManager = new GridLayoutManager(getContext(), mColumNum);
         mRecyclerView.setLayoutManager(mLayoutManager);
+        mMovieInfoObserver.addModelChangeListener(new FlowContentObserver.OnModelStateChangedListener() {
+            @Override
+            public void onModelStateChanged(@Nullable Class<?> table, BaseModel.Action action, @NonNull SQLCondition[] primaryKeyValues) {
+                mAdapter.setData(FillDataFromDB(false));
+                mAdapter.notifyDataSetChanged();
+            }
+        });
         //创建并设置Adapter
-        mAdapter = new MoviesAdapter(FillDataFromDB(),getContext());
+        mAdapter = new MoviesAdapter(FillDataFromDB(false),getContext());
+
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setOnItemClickListener(new MoviesAdapter.OnRecyclerViewItemClickListener() {
             @Override
@@ -109,13 +127,7 @@ public class MoviesFragment extends Fragment {
                 startActivity(intent);
             }
         });
-        mMovieInfoObserver.addModelChangeListener(new FlowContentObserver.OnModelStateChangedListener() {
-            @Override
-            public void onModelStateChanged(@Nullable Class<?> table, BaseModel.Action action, @NonNull SQLCondition[] primaryKeyValues) {
-                mAdapter.setDatas(FillDataFromDB());
-                mAdapter.notifyDataSetChanged();
-            }
-        });
+
         return rootView;
     }
 
@@ -125,17 +137,42 @@ public class MoviesFragment extends Fragment {
         mMovieInfoObserver.unregisterForContentChanges(getActivity());
     }
 
-    private List<MovieResult.MovieInfo> FillDataFromDB() {
-        boolean isFirst = Utility.isFirstInApp(getActivity());
+    private List<MovieResult.MovieInfo> FillDataFromDB(boolean isFavorite) {
         List<MovieResult.MovieInfo> movies= new ArrayList();
-        if (isFirst){
-            mDataHelper.pullMovieBicInfo(getActivity());
-            for (int i=0;i<4;i++){
-                movies.add(new MovieResult.MovieInfo("正在加载中。。。",0.0));
+        String sort = Utility.getPreferedSort(getActivity());
+        if (isFavorite){
+            if (sort=="popular"){
+                movies = ContentUtils.queryList(AppDatabase.MovieProviderModel.CONTENT_URI,
+                        MovieResult.MovieInfo.class,
+                        ConditionGroup.clause().and(MovieInfo_Table.favorite.is(true)),
+                        AppDatabase.MovieProviderModel.MOVIE_POPULAR+" DESC",new String[]{});
+            }else{
+                movies =  ContentUtils.queryList(AppDatabase.MovieProviderModel.CONTENT_URI,
+                        MovieResult.MovieInfo.class,
+                        ConditionGroup.clause().and(MovieInfo_Table.favorite.is(true)),
+                        AppDatabase.MovieProviderModel.MOVIE_SCORE+" DESC",new String[]{});
             }
+
         }else{
-            movies = ContentUtils.queryList(AppDatabase.MovieProviderModel.CONTENT_URI, MovieResult.MovieInfo.class, ConditionGroup.clause(), null,new String[]{});
+            boolean isFirst = Utility.isFirstInApp(getActivity());
+            if (isFirst){
+                mDataHelper.pullMovieBicInfo(getActivity());
+                for (int i=0;i<4;i++){
+                    movies.add(new MovieResult.MovieInfo("正在加载中。。。",0.0));
+                }
+            }else{
+                if (sort.equals("popular")){
+                    movies = ContentUtils.queryList(AppDatabase.MovieProviderModel.CONTENT_URI,
+                            MovieResult.MovieInfo.class, ConditionGroup.clause(),
+                            AppDatabase.MovieProviderModel.MOVIE_POPULAR+" DESC",new String[]{});
+                }else{
+                    movies = ContentUtils.queryList(AppDatabase.MovieProviderModel.CONTENT_URI,
+                            MovieResult.MovieInfo.class, ConditionGroup.clause(),
+                            AppDatabase.MovieProviderModel.MOVIE_SCORE+" DESC",new String[]{});
+                }
+            }
         }
+
         return movies;
     }
 

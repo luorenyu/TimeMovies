@@ -119,7 +119,7 @@ public  class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolde
         this.movies = movies;
     }
 
-    public void setDatas(List<MovieResult.MovieInfo> movies){
+    public void setData(List<MovieResult.MovieInfo> movies){
         this.movies=movies;
     }
 
