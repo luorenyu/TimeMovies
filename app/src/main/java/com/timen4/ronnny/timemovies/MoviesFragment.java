@@ -24,6 +24,7 @@ import com.timen4.ronnny.timemovies.Helper.DataHelper;
 import com.timen4.ronnny.timemovies.bean.MovieInfo_Table;
 import com.timen4.ronnny.timemovies.bean.MovieResult;
 import com.timen4.ronnny.timemovies.db.AppDatabase;
+import com.timen4.ronnny.timemovies.utils.ToastUtil;
 import com.timen4.ronnny.timemovies.utils.Utility;
 
 import java.util.ArrayList;
@@ -77,7 +78,7 @@ public class MoviesFragment extends Fragment {
             case R.id.action_favorite:
                 List<MovieResult.MovieInfo> movieInfoList = FillDataFromDB(true);
                 if (movieInfoList.size()==0){
-                    Toast.makeText(getActivity(),"您还没有收藏数据，快去收藏吧",Toast.LENGTH_SHORT).show();
+                    ToastUtil.show(getActivity(),getString(R.string.favorite_tip));
                     return true;
                 }
                 mAdapter.setData(FillDataFromDB(true));
@@ -119,7 +120,7 @@ public class MoviesFragment extends Fragment {
             @Override
             public void onItemClick(View view, MovieResult.MovieInfo data) {
                 if (!Utility.checkNetIsConnected(getActivity()) && data.getRelease_date()==null){
-                    Toast.makeText(getActivity(),"暂无网络连接，建议重新连接网络后重试",Toast.LENGTH_SHORT).show();
+                    ToastUtil.show(getActivity(),getString(R.string.no_network_tip));
                     return;
                 }
                 Intent intent= new Intent(getActivity(),DetailActivity.class);
@@ -158,7 +159,7 @@ public class MoviesFragment extends Fragment {
             if (isFirst){
                 mDataHelper.pullMovieBicInfo(getActivity());
                 for (int i=0;i<4;i++){
-                    movies.add(new MovieResult.MovieInfo("正在加载中。。。",0.0));
+                    movies.add(new MovieResult.MovieInfo(getString(R.string.loading),0.0));
                 }
             }else{
                 if (sort.equals("popular")){

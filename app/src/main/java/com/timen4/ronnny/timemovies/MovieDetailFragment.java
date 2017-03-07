@@ -1,13 +1,16 @@
 package com.timen4.ronnny.timemovies;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,11 +18,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.jaeger.library.StatusBarUtil;
 import com.raizlabs.android.dbflow.sql.language.ConditionGroup;
 import com.raizlabs.android.dbflow.structure.provider.ContentUtils;
 import com.squareup.picasso.Picasso;
@@ -29,9 +30,10 @@ import com.timen4.ronnny.timemovies.bean.MovieTrailer_Table;
 import com.timen4.ronnny.timemovies.bean.ReviewResult;
 import com.timen4.ronnny.timemovies.bean.TrailerResult;
 import com.timen4.ronnny.timemovies.db.AppDatabase;
+import com.timen4.ronnny.timemovies.utils.ToastUtil;
 import com.timen4.ronnny.timemovies.utils.Utility;
-import com.timen4.ronnny.timemovies.view.NestedListView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,11 +41,19 @@ import java.util.List;
  * Date: 2017/2/17
  */
 
-public class MovieDetailFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemClickListener {
+public class MovieDetailFragment extends Fragment implements View.OnClickListener{
+
+    private TrailerAdapter trailerAdapter;
+    private ReviewAdapter reviewAdapter;
+    private List<TrailerResult.MovieTrailer> trailers;
+    private List<ReviewResult.MovieReview> movieReviews;
+
     //https://image.tmdb.org/t/p/w185/hxGAYQDrvOH1kTlCGKlP0NE4Gar.jpg
     private static final String IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
     private ImageButton mFavorite;
     private MovieResult.MovieInfo mMovieItem;
+    private LinearLayoutManager mReviewLayoutManager;
+    private LinearLayoutManager mTrailerLayoutManager;
 
     public MovieDetailFragment() {
         super();
@@ -73,9 +83,24 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
         ImageView toolbar_image = (ImageView) rootView.findViewById(R.id.toolbar_image);
         TextView movie_time = (TextView) rootView.findViewById(R.id.movie_time);
         mFavorite = (ImageButton) rootView.findViewById(R.id.favorite);
-        NestedListView lv_comment = (NestedListView) rootView.findViewById(R.id.lv_comment);
-        NestedListView lv_trailer = (NestedListView) rootView.findViewById(R.id.lv_trailer);
-        NestedScrollView scrollView = (NestedScrollView) rootView.findViewById(R.id.scrollView);
+        RecyclerView lv_comment = (RecyclerView) rootView.findViewById(R.id.lv_comment);
+        RecyclerView lv_trailer = (RecyclerView) rootView.findViewById(R.id.lv_trailer);
+
+        mReviewLayoutManager = new LinearLayoutManager(getActivity());
+        mTrailerLayoutManager = new LinearLayoutManager(getActivity());
+       //solve the problem that the RecyclerView lost inertia
+        mReviewLayoutManager.setSmoothScrollbarEnabled(true);
+        mReviewLayoutManager.setAutoMeasureEnabled(true);
+
+        mTrailerLayoutManager.setSmoothScrollbarEnabled(true);
+        mTrailerLayoutManager.setAutoMeasureEnabled(true);
+
+        lv_comment.setLayoutManager(mReviewLayoutManager);
+        lv_trailer.setLayoutManager(mTrailerLayoutManager);
+        lv_comment.setHasFixedSize(true);
+        lv_comment.setNestedScrollingEnabled(false);
+        lv_trailer.setHasFixedSize(true);
+        lv_trailer.setNestedScrollingEnabled(false);
 
 
         if (mMovieItem !=null){
@@ -91,15 +116,34 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
             }else {
                 mFavorite.setBackgroundResource(R.drawable.favorite_normal);
             }
-            TrailerAdapter trailerAdapter =new TrailerAdapter(getTrailersFromDB(mMovieItem.getId()),getActivity());
-            lv_trailer.setAdapter(trailerAdapter);
-            lv_trailer.setOnItemClickListener(this);
 
-            ReviewAdapter reviewAdapter=new ReviewAdapter(getReviewsFromDB(mMovieItem.getId()),getActivity());
+            trailers = new ArrayList<>();
+            movieReviews = new ArrayList<>();
+            trailerAdapter = new TrailerAdapter(trailers, getActivity());
+            lv_trailer.setAdapter(trailerAdapter);
+            trailerAdapter.setOnItemClickListener(new TrailerAdapter.OnRecyclerViewItemClickListener() {
+                @Override
+                public void onItemClick(View view, TrailerResult.MovieTrailer data) {
+                    if (data.getKey()==null){
+                        return;
+                    }
+                    String youtobe_key = data.getKey();
+                    Uri uri = Uri.parse("https://www.youtube.com/watch?v="+youtobe_key);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
+                }
+            });
+            reviewAdapter = new ReviewAdapter(movieReviews, getActivity());
             lv_comment.setAdapter(reviewAdapter);
 
+//            TrailerAdapter trailerAdapter =new TrailerAdapter(getTrailersFromDB(mMovieItem.getId()),getActivity());
+//            lv_trailer.setAdapter(trailerAdapter);
+//            lv_trailer.setOnItemClickListener(this);
+//            ReviewAdapter reviewAdapter=new ReviewAdapter(getReviewsFromDB(mMovieItem.getId()),getActivity());
+//            lv_comment.setAdapter(reviewAdapter);
+
             if (!Utility.checkNetIsConnected(getActivity())){
-                Toast.makeText(getActivity(),"当前网络不可用，请链接网络后重试",Toast.LENGTH_SHORT).show();
+                ToastUtil.show(getActivity(),getString(R.string.no_network_tip));
             }
             loadPic(mMovieItem, movie_pic, toolbar_image);
         }
@@ -133,19 +177,19 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
         return movieTrailers;
     }
 
-    private void loadPic(MovieResult.MovieInfo mMovieItem, ImageView movie_pic, ImageView toolbar_image) {
+    private void loadPic(final MovieResult.MovieInfo mMovieItem, ImageView movie_pic, ImageView toolbar_image) {
         Picasso.with(getActivity())
                 .load(IMAGE_BASE_URL+"/w780"+ mMovieItem.getBackdrop_path())
                 .placeholder(R.mipmap.ic_launcher)
                 .into(toolbar_image, new com.squareup.picasso.Callback() {
                     @Override
                     public void onSuccess() {
-//                            Toast.makeText(getActivity(),"加载成功",Toast.LENGTH_SHORT).show();
+
                     }
 
                     @Override
                     public void onError(){
-                        Toast.makeText(getActivity(),"信息暂时无法加载",Toast.LENGTH_SHORT).show();
+                        ToastUtil.show(getActivity(),getString(R.string.load_error));
                     }
                 });
         Picasso.with(getActivity())
@@ -154,12 +198,13 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
                 .into(movie_pic, new com.squareup.picasso.Callback() {
                     @Override
                     public void onSuccess() {
-//                            Toast.makeText(getActivity(),"加载成功",Toast.LENGTH_SHORT).show();
+                        trailerAdapter.update(getTrailersFromDB(mMovieItem.getId()));
+                        reviewAdapter.update(getReviewsFromDB(mMovieItem.getId()));
                     }
 
                     @Override
                     public void onError(){
-                        Toast.makeText(getActivity(),"信息暂时无法加载",Toast.LENGTH_SHORT).show();
+                        ToastUtil.show(getActivity(),getString(R.string.load_error));
                     }
                 });
     }
@@ -179,18 +224,5 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
                 break;
         }
     }
-    //https://www.youtube.com/watch?v=N8vevpRyicY
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        TrailerResult.MovieTrailer item = (TrailerResult.MovieTrailer) parent.getAdapter().getItem(position);
-        if (item.getKey()==null){
-            return;
-        }
-        String youtobe_key = item.getKey();
-        Uri uri = Uri.parse("https://www.youtube.com/watch?v="+youtobe_key);
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        startActivity(intent);
 
-
-    }
 }

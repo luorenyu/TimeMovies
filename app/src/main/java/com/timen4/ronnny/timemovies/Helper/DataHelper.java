@@ -9,6 +9,7 @@ import com.raizlabs.android.dbflow.sql.language.ConditionGroup;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.raizlabs.android.dbflow.sql.language.Where;
 import com.raizlabs.android.dbflow.structure.provider.ContentUtils;
+import com.timen4.ronnny.timemovies.R;
 import com.timen4.ronnny.timemovies.bean.DetailResult;
 import com.timen4.ronnny.timemovies.bean.MovieInfo_Table;
 import com.timen4.ronnny.timemovies.bean.MovieResult;
@@ -17,6 +18,7 @@ import com.timen4.ronnny.timemovies.bean.SortResult;
 import com.timen4.ronnny.timemovies.bean.SortResult_Table;
 import com.timen4.ronnny.timemovies.bean.TrailerResult;
 import com.timen4.ronnny.timemovies.db.AppDatabase;
+import com.timen4.ronnny.timemovies.utils.ToastUtil;
 import com.timen4.ronnny.timemovies.utils.Utility;
 
 import java.util.ArrayList;
@@ -64,7 +66,7 @@ public class DataHelper {
      */
     public void pullMovieBicInfo(final Context context){
         if (!Utility.checkNetIsConnected(context)){
-            Toast.makeText(context,"当前网络不可用，请链接网络后重试",Toast.LENGTH_SHORT).show();
+            ToastUtil.show(context,context.getString(R.string.no_network_tip));
             return;
         }
         //1.创建Retrofit对象

@@ -15,7 +15,7 @@
             android:id="@+id/collapsing_toolbar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:contentScrim="@color/title_background"
+            app:contentScrim="#af000000"
             app:expandedTitleMarginEnd="40dp"
             app:expandedTitleMarginStart="10dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
@@ -133,7 +133,7 @@
                     android:textColor="@color/orange"
                     android:layout_width="match_parent"
                     android:layout_height="30dp"/>
-                <com.timen4.ronnny.timemovies.view.NestedListView
+                <android.support.v7.widget.RecyclerView
                     android:id="@+id/lv_trailer"
                     android:divider="@android:color/transparent"
                     android:layout_width="match_parent"
@@ -148,7 +148,7 @@
                     android:textColor="@color/orange"
                     android:layout_width="match_parent"
                     android:layout_height="30dp"/>
-                <com.timen4.ronnny.timemovies.view.NestedListView
+                <android.support.v7.widget.RecyclerView
                     android:id="@+id/lv_comment"
                     android:divider="@android:color/transparent"
                     android:layout_width="match_parent"

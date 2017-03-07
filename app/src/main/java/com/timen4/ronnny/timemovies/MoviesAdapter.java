@@ -1,4 +1,5 @@
-package com.timen4.ronnny.timemovies;//
+package com.timen4.ronnny.timemovies;
+
 //package com.timen4.ronnny.timemovies;
 //import android.content.Context;
 //import android.database.Cursor;
@@ -90,8 +91,6 @@ package com.timen4.ronnny.timemovies;//
 //    public static interface OnRecyclerViewItemClickListener {
 //        void onItemClick(View view , MovieResult.MovieInfo data);
 //    }
-//
-//
 //}
 
 import android.content.Context;
