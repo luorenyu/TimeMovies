@@ -109,7 +109,12 @@ public class MoviesFragment extends Fragment {
             @Override
             public void onModelStateChanged(@Nullable Class<?> table, BaseModel.Action action, @NonNull SQLCondition[] primaryKeyValues) {
                 mAdapter.setData(FillDataFromDB(false));
-                mAdapter.notifyDataSetChanged();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
             }
         });
         //创建并设置Adapter

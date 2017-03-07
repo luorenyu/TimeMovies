@@ -5,9 +5,11 @@ import android.database.Cursor;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.raizlabs.android.dbflow.sql.SqlUtils;
 import com.raizlabs.android.dbflow.sql.language.ConditionGroup;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.raizlabs.android.dbflow.sql.language.Where;
+import com.raizlabs.android.dbflow.structure.BaseModel;
 import com.raizlabs.android.dbflow.structure.provider.ContentUtils;
 import com.timen4.ronnny.timemovies.R;
 import com.timen4.ronnny.timemovies.bean.DetailResult;
@@ -151,6 +153,7 @@ public class DataHelper {
                                     movieInfo.setTime(detailResult.getRuntime());
                                     int update = ContentUtils.update(context.getContentResolver(), AppDatabase.MovieProviderModel.CONTENT_URI, movieInfo);
                                     Log.e(TAG,"update 的数量"+update);
+                                    SqlUtils.notifyModelChanged(MovieResult.MovieInfo.class, BaseModel.Action.CHANGE, null);
                                 }
                             }
 
