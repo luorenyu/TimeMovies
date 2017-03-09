@@ -189,6 +189,9 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
 
                     @Override
                     public void onError(){
+                        if(getActivity()==null){
+                            return;
+                        }
                         ToastUtil.show(getActivity(),getString(R.string.load_error));
                     }
                 });
@@ -198,12 +201,18 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
                 .into(movie_pic, new com.squareup.picasso.Callback() {
                     @Override
                     public void onSuccess() {
+                        if(getActivity()==null){
+                            return;
+                        }
                         trailerAdapter.update(getTrailersFromDB(mMovieItem.getId()));
                         reviewAdapter.update(getReviewsFromDB(mMovieItem.getId()));
                     }
 
                     @Override
                     public void onError(){
+                        if(getActivity()==null){
+                            return;
+                        }
                         ToastUtil.show(getActivity(),getString(R.string.load_error));
                     }
                 });
