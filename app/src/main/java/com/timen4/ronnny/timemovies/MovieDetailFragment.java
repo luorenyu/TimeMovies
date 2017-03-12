@@ -1,9 +1,7 @@
 package com.timen4.ronnny.timemovies;
 
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -15,12 +13,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.jaeger.library.StatusBarUtil;
 import com.raizlabs.android.dbflow.sql.language.ConditionGroup;
 import com.raizlabs.android.dbflow.structure.provider.ContentUtils;
 import com.squareup.picasso.Picasso;
@@ -43,6 +39,7 @@ import java.util.List;
 
 public class MovieDetailFragment extends Fragment implements View.OnClickListener{
 
+    private  boolean isTwoPanel;
     private TrailerAdapter trailerAdapter;
     private ReviewAdapter reviewAdapter;
     private List<TrailerResult.MovieTrailer> trailers;
@@ -58,6 +55,10 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
     public MovieDetailFragment() {
         super();
     }
+    public MovieDetailFragment(boolean isTwoPanel) {
+        super();
+        this.isTwoPanel=isTwoPanel;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,16 +66,20 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
 
     }
 
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView =inflater.inflate(R.layout.fragment_detail,container,false);
-        mMovieItem = getActivity().getIntent().getParcelableExtra("movieObject");
+//        mMovieItem = getActivity().getIntent().getParcelableExtra("movieObject");
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mMovieItem = arguments.getParcelable("movieObject");
+        }
 
         //给页面设置工具栏
-        final Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar_layout);
         ImageView movie_pic = (ImageView) rootView.findViewById(R.id.movie_pic);
         TextView tv_score = (TextView) rootView.findViewById(R.id.movie_score);
@@ -85,6 +90,11 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
         mFavorite = (ImageButton) rootView.findViewById(R.id.favorite);
         RecyclerView lv_comment = (RecyclerView) rootView.findViewById(R.id.lv_comment);
         RecyclerView lv_trailer = (RecyclerView) rootView.findViewById(R.id.lv_trailer);
+        if (isTwoPanel){
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        }else{
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         mReviewLayoutManager = new LinearLayoutManager(getActivity());
         mTrailerLayoutManager = new LinearLayoutManager(getActivity());
@@ -135,6 +145,8 @@ public class MovieDetailFragment extends Fragment implements View.OnClickListene
             });
             reviewAdapter = new ReviewAdapter(movieReviews, getActivity());
             lv_comment.setAdapter(reviewAdapter);
+            trailerAdapter.setIsTwoPanel(isTwoPanel);
+            reviewAdapter.setIsTwoPanel(isTwoPanel);
 
 //            TrailerAdapter trailerAdapter =new TrailerAdapter(getTrailersFromDB(mMovieItem.getId()),getActivity());
 //            lv_trailer.setAdapter(trailerAdapter);

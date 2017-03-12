@@ -20,7 +20,7 @@ public class AppDatabase {
 
     public static final int VERSION = 1;
 
-    public static final String AUTHORITY = "com.timen4.ronnny.timemovies.db";
+    public static final String AUTHORITY = "com.timen4.ronnny.timemovies";
 
     public static final String BASE_CONTENT_URI = "content://";
 

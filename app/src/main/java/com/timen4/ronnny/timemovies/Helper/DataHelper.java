@@ -20,6 +20,7 @@ import com.timen4.ronnny.timemovies.bean.SortResult;
 import com.timen4.ronnny.timemovies.bean.SortResult_Table;
 import com.timen4.ronnny.timemovies.bean.TrailerResult;
 import com.timen4.ronnny.timemovies.db.AppDatabase;
+import com.timen4.ronnny.timemovies.sync.MovieSyncAdapter;
 import com.timen4.ronnny.timemovies.utils.ToastUtil;
 import com.timen4.ronnny.timemovies.utils.Utility;
 
@@ -152,7 +153,7 @@ public class DataHelper {
                                     }
                                     movieInfo.setTime(detailResult.getRuntime());
                                     int update = ContentUtils.update(context.getContentResolver(), AppDatabase.MovieProviderModel.CONTENT_URI, movieInfo);
-                                    Log.e(TAG,"update 的数量"+update);
+                                    Log.e(TAG,"更新时间的数量:"+update+"——"+movieInfo.getTitle()+":"+movieInfo.getTime());
                                     SqlUtils.notifyModelChanged(MovieResult.MovieInfo.class, BaseModel.Action.CHANGE, null);
                                 }
                             }
@@ -176,8 +177,9 @@ public class DataHelper {
                                     for (ReviewResult.MovieReview review:reviewList) {
                                         review.movie=response.body().getId();
                                         ContentUtils.insert(context.getContentResolver(), AppDatabase.ReviewProviderModel.CONTENT_URI,review);
-                                        Log.e(TAG,review.movie+review.getContent());
+                                        Log.e(TAG,"更新评论："+review.movie+":"+review.getUrl());
                                     }
+
                                 }
 
                             }
@@ -201,7 +203,7 @@ public class DataHelper {
                                     for (TrailerResult.MovieTrailer trailer :trailerList) {
                                         trailer.movie=response.body().getId();
                                         ContentUtils.insert(context.getContentResolver(), AppDatabase.TrailerProvidermodel.CONTENT_URI,trailer);
-                                        Log.e(TAG,trailer.movie+trailer.getKey());
+                                        Log.e(TAG,"更新预告片："+trailer.movie+":"+trailer.getKey());
                                     }
                                 }
                             }
@@ -212,6 +214,7 @@ public class DataHelper {
                             }
                         });
                     }
+                    MovieSyncAdapter.notifyMovies(context);
                 }
             }
 //

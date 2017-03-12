@@ -1,6 +1,7 @@
 package com.timen4.ronnny.timemovies;
 
 import android.content.Context;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
     private List<ReviewResult.MovieReview> mReviews;
     private Context mContext;
     private OnRecyclerViewItemClickListener mOnRecyclerViewItemClikListener;
+    private boolean isTwoPanel;
 
     public ReviewAdapter(List<ReviewResult.MovieReview> mReviews, Context mContext) {
         this.mReviews = mReviews;
@@ -28,6 +30,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.review_item, parent,false);
+
         ViewHolder viewHolder=new ViewHolder(view);
         view.setOnClickListener(this);
         return viewHolder;
@@ -54,6 +57,10 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
     public void update(List<ReviewResult.MovieReview> reviews) {
         mReviews=reviews;
         notifyDataSetChanged();
+    }
+
+    public void setIsTwoPanel(boolean isTwoPanel) {
+        this.isTwoPanel=isTwoPanel;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

@@ -9,5 +9,15 @@
         android:entryValues="@array/pref_sorts_values"
         android:entries="@array/pref_sorts_options"
         />
+    <SwitchPreference
+        android:persistent="true"
+        android:key="@string/pref_enable_notifications_key"
+        android:defaultValue="@string/pref_enable_notifications_default"
+        android:title="@string/pref_enable_notifications_label"
+        android:summaryOn="@string/pref_enable_notifications_true"
+        android:summaryOff="@string/pref_enable_notifications_false"
+        />
+
+
 
 </PreferenceScreen>

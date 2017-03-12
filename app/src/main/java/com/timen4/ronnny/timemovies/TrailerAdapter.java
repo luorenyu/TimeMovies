@@ -22,6 +22,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
     public List<TrailerResult.MovieTrailer> mMovieTrailers = null;
     private Context mContext;
     private TrailerAdapter.OnRecyclerViewItemClickListener mOnItemClickListener = null;
+    private boolean mIsTwoPanel;
 
     public TrailerAdapter(List<TrailerResult.MovieTrailer> movieTrailers, Context mContext) {
         this.mMovieTrailers = movieTrailers;
@@ -65,6 +66,11 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
             mOnItemClickListener.onItemClick(view, (TrailerResult.MovieTrailer) view.getTag());
         }
     }
+
+    public void setIsTwoPanel(boolean isTwoPanel) {
+        this.mIsTwoPanel=isTwoPanel;
+    }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 

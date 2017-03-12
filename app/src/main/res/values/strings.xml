@@ -18,4 +18,21 @@
     <string name="favorite_tip">您还没有收藏数据，快去收藏吧</string>
     <string name="no_network_tip">当前网络不可用，请链接网络后重试</string>
     <string name="loading">正在加载中。。。</string>
+
+    <string name="content_authority">com.timen4.ronnny.timemovies</string>
+    <string name="sync_account_type">timemovies.ronnny.timen4.com</string>
+
+    <!-- Strings related to Notification preference -->
+    <string name="pref_last_notification">last_notification</string>
+
+    <!-- Strings related to Notification Enabled preference -->
+    <string name="pref_enable_notifications_key" translatable="false">enable_notifications</string>
+    <string name="pref_enable_notifications_label">TimeMovie 通知</string>
+
+    <string name="pref_enable_notifications_true">已打开</string>
+    <string name="pref_enable_notifications_false">已关闭</string>
+    <string name="pref_enable_notifications_default" translatable="false">true</string>
+    <string name="action_setting">Setting</string>
+    <string name="poularMovie">热门电影：</string>
+    <string name="highScoreMovie">高分电影：</string>
 </resources>
