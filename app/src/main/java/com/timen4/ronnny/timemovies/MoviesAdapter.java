@@ -161,6 +161,7 @@ public  class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolde
             }else{
                 viewHolder.itemView.setActivated(false);
             }
+            viewHolder.mIv_pic.setVisibility(View.GONE);
             viewHolder.mIv_pic2.setImageResource(R.mipmap.ic_launcher);
             Picasso.with(mContext)
                     .load(IMAGE_BASE_URL2+movie.getBackdrop_path())
@@ -178,6 +179,7 @@ public  class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolde
                     });
         }else{
             viewHolder.mIv_pic.setImageResource(R.mipmap.ic_launcher);
+            viewHolder.mIv_pic2.setVisibility(View.GONE);
             Picasso.with(mContext)
                     .load(IMAGE_BASE_URL+movie.getPoster_path())
                     .placeholder(R.mipmap.ic_launcher)

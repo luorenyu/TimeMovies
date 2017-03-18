@@ -40,7 +40,6 @@ import java.util.List;
 
 public class MoviesFragment extends Fragment {
     private String TAG=MoviesFragment.class.getSimpleName();
-    private DataHelper mDataHelper;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
     private MoviesAdapter mAdapter;
@@ -65,7 +64,6 @@ public class MoviesFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         setHasOptionsMenu(true);
-        mDataHelper=new DataHelper(getContext());
         mMovieInfoObserver= new FlowContentObserver();
         mMovieInfoObserver.registerForContentChanges(getActivity(), MovieResult.MovieInfo.class);
     }
@@ -81,7 +79,6 @@ public class MoviesFragment extends Fragment {
         int itemId=item.getItemId();
         switch (itemId){
             case R.id.action_refresh:
-//                mDataHelper.pullMovieBicInfo(getActivity());
                 MovieSyncAdapter.syncImmediately(getActivity());
                 return true;
             case R.id.action_setting:
@@ -147,7 +144,6 @@ public class MoviesFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
         //create a adapter and set it to RecyclerView
         mAdapter = new MoviesAdapter(FillDataFromDB(false),getContext());
-        mPosition = (int) SharedPreferencesUtils.getParam(getActivity(), SELECTED_KEY, 0);
         if (mTwoPanel&&FillDataFromDB(false)!=null&&FillDataFromDB(false).size()>0){
             ((ItemCallback)getActivity()).onItemSelect(FillDataFromDB(false).get(mPosition));
         }
@@ -201,12 +197,6 @@ public class MoviesFragment extends Fragment {
                 }
                 ((ItemCallback)getActivity()).onItemSelect(data);
                 mPosition = position;
-                SharedPreferencesUtils.setParam(getActivity(),SELECTED_KEY,mPosition);
-//                Bundle b = getArguments();
-//                if(b != null){
-//                    b.putInt(SELECTED_KEY, mPosition);  //更新参数
-//                }
-
             }
         });
 
@@ -214,13 +204,19 @@ public class MoviesFragment extends Fragment {
     }
 
     @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState!=null){
+            mPosition=savedInstanceState.getInt(SELECTED_KEY);
+        }
+        Log.e(TAG,"onViewStateTestored:"+mPosition);
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
-        // When tablets rotate, the currently selected list item needs to be saved.
-        // When no item is selected, mPosition will be set to Listview.INVALID_POSITION,
-        // so check for that before storing.
-//        if (mPosition != ListView.INVALID_POSITION) {
-//            outState.putInt(SELECTED_KEY, mPosition);
-//        }
+        if (mPosition != ListView.INVALID_POSITION) {
+            outState.putInt(SELECTED_KEY, mPosition);
+        }
 
         Log.e(TAG,"onSaveInstanceState"+outState.get(SELECTED_KEY));
         super.onSaveInstanceState(outState);
@@ -252,7 +248,6 @@ public class MoviesFragment extends Fragment {
         }else{
             boolean isFirst = Utility.isFirstInApp(getActivity());
             if (isFirst){
-//                mDataHelper.pullMovieBicInfo(getActivity());
 //                MovieSyncAdapter.syncImmediately(getActivity());
                 for (int i=0;i<4;i++){
                     movies.add(new MovieResult.MovieInfo(getString(R.string.loading),0.0));
@@ -280,7 +275,7 @@ public class MoviesFragment extends Fragment {
         }
     }
     public interface ItemCallback {
-        public void onItemSelect(MovieResult.MovieInfo data);
+        void onItemSelect(MovieResult.MovieInfo data);
     }
 }
 

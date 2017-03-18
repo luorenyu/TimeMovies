@@ -7,60 +7,67 @@ import android.app.PendingIntent;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.text.format.Time;
 import android.util.Log;
-import android.widget.CursorAdapter;
 
+import com.raizlabs.android.dbflow.sql.SqlUtils;
 import com.raizlabs.android.dbflow.sql.language.ConditionGroup;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
+import com.raizlabs.android.dbflow.sql.language.Where;
+import com.raizlabs.android.dbflow.structure.BaseModel;
 import com.raizlabs.android.dbflow.structure.provider.ContentUtils;
 import com.timen4.ronnny.timemovies.Helper.DataHelper;
 import com.timen4.ronnny.timemovies.MainActivity;
 import com.timen4.ronnny.timemovies.R;
+import com.timen4.ronnny.timemovies.bean.DetailResult;
 import com.timen4.ronnny.timemovies.bean.MovieInfo_Table;
 import com.timen4.ronnny.timemovies.bean.MovieResult;
+import com.timen4.ronnny.timemovies.bean.ReviewResult;
+import com.timen4.ronnny.timemovies.bean.SortResult;
+import com.timen4.ronnny.timemovies.bean.SortResult_Table;
+import com.timen4.ronnny.timemovies.bean.TrailerResult;
 import com.timen4.ronnny.timemovies.db.AppDatabase;
+import com.timen4.ronnny.timemovies.utils.ToastUtil;
 import com.timen4.ronnny.timemovies.utils.Utility;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+import static com.timen4.ronnny.timemovies.BuildConfig.API_KEY;
 
 
 public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
-    public final String LOG_TAG = MovieSyncAdapter.class.getSimpleName();
+    public final String TAG = MovieSyncAdapter.class.getSimpleName();
     // Interval at which to sync with the weather, in seconds.
     // 60 seconds (1 minute) * 240 = 4 hours
     public static final int SYNC_INTERVAL = 60*60*4;
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
     private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
     private static final int WEATHER_NOTIFICATION_ID = 3004;
+
+    private static final String BASE_URL = "http://api.themoviedb.org/";
+
+    private static final String POPULAR="popular";
+    private static final String TOP_RATED="top_rated";
 
 
 
@@ -70,9 +77,166 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        DataHelper dataHelper=new DataHelper(getContext());
-        dataHelper.pullMovieBicInfo(getContext());
-        Log.e(LOG_TAG,"正在同步数据......");
+//        DataHelper dataHelper=new DataHelper(getContext());
+//        dataHelper.pullMovieBicInfo(getContext());
+        final Context context = getContext();
+        if (!Utility.checkNetIsConnected(context)){
+            ToastUtil.show(context,context.getString(R.string.no_network_tip));
+            return;
+        }
+        //1.创建Retrofit对象
+        Retrofit retrofit = new Retrofit.Builder()
+                .addConverterFactory(GsonConverterFactory.create())//解析方法
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .baseUrl(BASE_URL)//主机地址
+                .build();
+
+        final String mLanguage="zh";
+//        //2.创建访问API的请求
+        final String sort = Utility.getPreferedSort(context);
+        Call<MovieResult> call=null;
+
+        final DataHelper.MovieService service = retrofit.create(DataHelper.MovieService.class);
+// note: i wanna try to use rxjava+retrofit ,but failed,i don't where doesn't work.this is code:
+
+//        service.getMovieInfo2(mLanguage, API_KEY)
+//                .subscribeOn(Schedulers.newThread())
+//                .observeOn(Schedulers.io())
+//                .map(new Func1<MovieResult, List<MovieResult.MovieInfo>>() {
+//                    @Override
+//                    public List<MovieResult.MovieInfo> call(MovieResult movieResult) {
+//                        List<MovieResult.MovieInfo> results = movieResult.getResults();
+//                        System.out.print(results.get(0).getTitle());
+//                        return null;
+//                    }
+//                });
+
+
+
+
+        switch (sort){
+            case "popular":
+                call=service.getMovieInfo3(POPULAR,mLanguage,API_KEY);
+                break;
+            case "top_rated":
+                call = service.getMovieInfo3(TOP_RATED, mLanguage, API_KEY);
+                break;
+        }
+
+        //3.send request
+        call.enqueue(new Callback<MovieResult>() {
+            @Override
+            public void onResponse(Call<MovieResult> call, Response<MovieResult> response) {
+                //4.处理结果
+                if (response.isSuccessful()){
+                    ArrayList<MovieResult.MovieInfo> result= (ArrayList) response.body().getResults();
+                    SortResult sortResult = new SortResult();
+                    sortResult.sort=sort;
+                    if (result==null||result.size()<1){
+                        return;
+                    }
+                    //first inert the the way of sort
+                    ContentUtils.insert(context.getContentResolver(), AppDatabase.SortProviderModel.CONTENT_URI,sortResult);
+                    Where<SortResult> resultWhere2 = SQLite.select().from(SortResult.class).where(SortResult_Table.sort.eq(sort));
+                    for (final MovieResult.MovieInfo movie :result) {
+                        movie.sort=resultWhere2.querySingle()._id;
+                        MovieResult.MovieInfo movieInfo1 = ContentUtils.querySingle(context.getContentResolver(),
+                                AppDatabase.MovieProviderModel.CONTENT_URI,
+                                MovieResult.MovieInfo.class,
+                                ConditionGroup.clause().and(MovieInfo_Table.id.is(movie.getId())), null);
+                        if (movieInfo1!=null&&movieInfo1.getTime()!=0){
+                            continue;
+                        }
+                        ContentUtils.insert(context.getContentResolver(), AppDatabase.MovieProviderModel.CONTENT_URI,movie);
+                        Log.e(TAG,movie.getId()+movie.getTitle());
+
+                        Call<DetailResult> movieCall = service.getMovieDetail(movie.getId(), API_KEY);
+                        movieCall.enqueue(new Callback<DetailResult>() {
+                            @Override
+                            public void onResponse(Call<DetailResult> call, Response<DetailResult> response) {
+                                if (response.isSuccessful()){
+                                    DetailResult detailResult = response.body();
+                                    MovieResult.MovieInfo movieInfo = ContentUtils.querySingle(context.getContentResolver(),
+                                            AppDatabase.MovieProviderModel.CONTENT_URI,
+                                            MovieResult.MovieInfo.class,
+                                            ConditionGroup.clause().and(MovieInfo_Table.id.is(detailResult.getId())), null);
+                                    if (detailResult==null||movieInfo==null){
+                                        return;
+                                    }
+                                    movieInfo.setTime(detailResult.getRuntime());
+                                    int update = ContentUtils.update(context.getContentResolver(), AppDatabase.MovieProviderModel.CONTENT_URI, movieInfo);
+                                    Log.e(TAG,"更新时间的数量:"+update+"——"+movieInfo.getTitle()+":"+movieInfo.getTime());
+                                    SqlUtils.notifyModelChanged(MovieResult.MovieInfo.class, BaseModel.Action.CHANGE, null);
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<DetailResult> call, Throwable t) {
+                                Log.e(TAG,"更新movieInfo失败:"+t.toString());
+                            }
+                        });
+
+                        Call<ReviewResult> reviewCall = service.getMovieReview(movie.getId(), API_KEY);
+                        //request movie's reviews
+                        reviewCall.enqueue(new Callback<ReviewResult>() {
+                            @Override
+                            public void onResponse(Call<ReviewResult> call, Response<ReviewResult> response) {
+                                if(response.isSuccessful()){
+                                    List<ReviewResult.MovieReview> reviewList= response.body().getResults();
+                                    if (reviewList==null){
+                                        return;
+                                    }
+                                    for (ReviewResult.MovieReview review:reviewList) {
+                                        review.movie=response.body().getId();
+                                        ContentUtils.insert(context.getContentResolver(), AppDatabase.ReviewProviderModel.CONTENT_URI,review);
+                                        Log.e(TAG,"更新评论："+review.movie+":"+review.getUrl());
+                                    }
+
+                                }
+
+                            }
+
+                            @Override
+                            public void onFailure(Call<ReviewResult> call, Throwable t) {
+                                Log.e("request movieReview failed",t.toString());
+                            }
+                        });
+
+                        //request movie's trailers
+                        final Call<TrailerResult> trailerCall = service.getMovieTrailer(movie.getId(), API_KEY);
+                        trailerCall.enqueue(new Callback<TrailerResult>() {
+                            @Override
+                            public void onResponse(Call<TrailerResult> call, Response<TrailerResult> response) {
+                                if (response.isSuccessful()){
+                                    List<TrailerResult.MovieTrailer> trailerList = response.body().getResults();
+                                    if (trailerList==null){
+                                        return;
+                                    }
+                                    for (TrailerResult.MovieTrailer trailer :trailerList) {
+                                        trailer.movie=response.body().getId();
+                                        ContentUtils.insert(context.getContentResolver(), AppDatabase.TrailerProvidermodel.CONTENT_URI,trailer);
+                                        Log.e(TAG,"更新预告片："+trailer.movie+":"+trailer.getKey());
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<TrailerResult> call, Throwable t) {
+                                Log.e("request movieTrailer failed",t.toString());
+                            }
+                        });
+                    }
+                    MovieSyncAdapter.notifyMovies(context);
+                }
+            }
+            //
+            @Override
+            public void onFailure(Call<MovieResult> call, Throwable t) {
+                Log.e("request movieInfo failed",t.toString());
+            }
+        });
+
+        Log.e(TAG,"正在同步数据......");
     }
 
 //    /**
@@ -219,10 +383,10 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 //                notifyMovies();
 //            }
 //
-//            Log.d(LOG_TAG, "Sunshine Service Complete. " + cVVector.size() + " Inserted");
+//            Log.d(TAG, "Sunshine Service Complete. " + cVVector.size() + " Inserted");
 //
 //        } catch (JSONException e) {
-//            Log.e(LOG_TAG, e.getMessage(), e);
+//            Log.e(TAG, e.getMessage(), e);
 //            e.printStackTrace();
 //        }
 //    }

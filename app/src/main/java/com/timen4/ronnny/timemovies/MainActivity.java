@@ -25,26 +25,24 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.It
             mTwoPanel=true;
             if (savedInstanceState==null){
                 getSupportFragmentManager().beginTransaction().
-                        replace(R.id.detail_container,new MovieDetailFragment())
+                        add(R.id.detail_container,new MovieDetailFragment())
                         .commit();
             }
         }else{
             mTwoPanel=false;
 //            getSupportActionBar().setElevation(0f);
         }
-        MoviesFragment moviesFragment = new MoviesFragment(mTwoPanel);
-//        Bundle bundle=moviesFragment.getArguments();
-//        if (bundle==null){
-//            bundle=new Bundle();
-//            bundle.putInt(MoviesFragment.SELECTED_KEY,0);
-//        }
-//        moviesFragment.setArguments(bundle);
+
+
+        MoviesFragment moviesFragment = (MoviesFragment) getSupportFragmentManager().findFragmentById(R.id.menu_container);
+
+        if (moviesFragment==null){
+            moviesFragment=new MoviesFragment(mTwoPanel);
+        }
         getSupportFragmentManager().beginTransaction().
                 replace(R.id.menu_container,moviesFragment)
                 .commit();
 
-//        MoviesFragment menuFragment = (MoviesFragment) getSupportFragmentManager().findFragmentById(R.id.menu_container);
-//        menuFragment.setTwoPanel(mTwoPanel);
         MovieSyncAdapter.initializeSyncAdapter(this);
 
     }
