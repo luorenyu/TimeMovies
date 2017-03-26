@@ -21,6 +21,7 @@ public class SettingActivity extends PreferenceActivity implements Preference.On
         //For all preferences,attach an OnPreferenceChangeListener so the UI summary
         //can be updated when preference changes.
         bindPreferenceSummaryToBalue(findPreference(getString(R.string.pre_sort_key)));
+        bindPreferenceSummaryToBalue(findPreference(getString(R.string.sync_frequency_key)));
     }
 
     private void bindPreferenceSummaryToBalue(Preference preference){

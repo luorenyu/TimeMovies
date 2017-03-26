@@ -2,6 +2,7 @@ package com.timen4.ronnny.timemovies.utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -46,5 +47,21 @@ public class Utility {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         String sort= sharedPrefs.getString(context.getString(R.string.pre_sort_key),context.getString(R.string.pre_popular_sort));
         return sort;
+    }
+    public static int getPreferedSyncFrequency(Context context){
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String frequency= sharedPrefs.getString(context.getString(R.string.sync_frequency_key),context.getString(R.string.sync_a_day));
+        int sync;
+        if (frequency.equals(context.getString(R.string.sync_a_day))){
+            sync=24;
+        }else if (frequency.equals(context.getString(R.string.sync_4_hours))){
+            sync=4;
+        }else if (frequency.equals(context.getString(R.string.sync_a_week))){
+            sync=24*60;
+        }else{
+            sync= Integer.MAX_VALUE;
+        }
+
+        return sync;
     }
 }

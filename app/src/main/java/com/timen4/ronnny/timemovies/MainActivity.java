@@ -1,8 +1,12 @@
 package com.timen4.ronnny.timemovies;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toolbar;
+
 
 import com.timen4.ronnny.timemovies.bean.MovieResult;
 import com.timen4.ronnny.timemovies.sync.MovieSyncAdapter;
@@ -16,6 +20,7 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.It
 
     private boolean mTwoPanel;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,7 +35,6 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.It
             }
         }else{
             mTwoPanel=false;
-//            getSupportActionBar().setElevation(0f);
         }
 
 

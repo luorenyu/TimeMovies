@@ -20,20 +20,19 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name="com.timen4.ronnny.timemovies.MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"
-
             android:configChanges="orientation|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
         <activity android:name="com.timen4.ronnny.timemovies.DetailActivity"
-                  android:theme="@style/Theme.Design.Light.NoActionBar"
+                  android:theme="@style/AppTheme.Full"
                   android:parentActivityName="com.timen4.ronnny.timemovies.MainActivity">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                        android:value="com.timen4.ronnny.timemovies.MainActivity"/>
@@ -52,7 +51,7 @@
             android:name=".db.AppDatabase_Provider"
             android:syncable="true"/>
 
-         SyncAdapter's dummy authentication service
+         <!--SyncAdapter's dummy authentication service-->
         <service android:name=".sync.TimeMovieAuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />

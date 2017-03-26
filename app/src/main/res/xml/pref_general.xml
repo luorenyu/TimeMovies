@@ -17,6 +17,14 @@
         android:summaryOn="@string/pref_enable_notifications_true"
         android:summaryOff="@string/pref_enable_notifications_false"
         />
+    <ListPreference
+        android:title="@string/sync_frequency"
+        android:key="@string/sync_frequency_key"
+        android:defaultValue="@string/sync_a_day"
+        android:entryValues="@array/sync_frequency_values"
+        android:entries="@array/sync_frequency_options"
+        />
+
 
 
 

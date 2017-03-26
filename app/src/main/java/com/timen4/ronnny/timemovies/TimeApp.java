@@ -17,8 +17,6 @@ public class TimeApp extends Application {
         super.onCreate();
         FlowManager.init(new FlowConfig.Builder(this)
                 .openDatabasesOnInit(true).build());
-//        SharedPreferencesUtils.setParam(this,
-//                SharedPreferencesUtils.LISTEN_FIRST_ITEM_TDATA,true);
         SharedPreferencesUtils.setParam(this,MoviesFragment.SELECTED_KEY,0);
     }
 

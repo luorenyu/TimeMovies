@@ -9,4 +9,20 @@
         <item>@string/pre_popular_sort</item>
         <item>@string/pre_top_rated_sort</item>
     </string-array>
+
+    <string-array name="sync_frequency_options">
+        <item>@string/sync_4_hours_label</item>
+        <item>@string/sync_a_day_label</item>
+        <item>@string/sync_a_week_label</item>
+        <item>@string/sync_never_label</item>
+    </string-array>
+
+    <string-array name="sync_frequency_values">
+        <item>@string/sync_4_hours</item>
+        <item>@string/sync_a_day</item>
+        <item>@string/sync_a_week</item>
+        <item>@string/sync_never</item>
+    </string-array>
+
+
 </resources>

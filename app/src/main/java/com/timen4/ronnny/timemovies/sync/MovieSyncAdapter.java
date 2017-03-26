@@ -59,8 +59,8 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
     public final String TAG = MovieSyncAdapter.class.getSimpleName();
     // Interval at which to sync with the weather, in seconds.
     // 60 seconds (1 minute) * 240 = 4 hours
-    public static final int SYNC_INTERVAL = 60*60*4;
-    public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
+    public static final int SYNC_INTERVA_BASE = 60*60;
+    public static final int SYNC_FLEXTIME = SYNC_INTERVA_BASE /3;
     private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
     private static final int WEATHER_NOTIFICATION_ID = 3004;
 
@@ -542,10 +542,12 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
     private static void onAccountCreated(Account newAccount, Context context) {
+        int syncFrequency = Utility.getPreferedSyncFrequency(context);
+
         /*
          * Since we've created an account
          */
-        MovieSyncAdapter.configurePeriodicSync(context, SYNC_INTERVAL, SYNC_FLEXTIME);
+        MovieSyncAdapter.configurePeriodicSync(context, syncFrequency*SYNC_INTERVA_BASE, SYNC_FLEXTIME);
 
         /*
          * Without calling setSyncAutomatically, our periodic sync will not be enabled.

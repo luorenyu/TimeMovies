@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">TimeMoies</string>
     <string name="menu_refresh">刷新</string>
+
     <string name="main_menu_setting">设置</string>
     <string name="movie_detail">电影详情</string>
     <string name="pre_sort_label">排序方式</string>
@@ -9,6 +10,7 @@
     <string name="pre_top_rated_sort">top_rated</string>
     <string name="pre_popular_sort_label">热门</string>
     <string name="pre_top_rated_sort_label">高分</string>
+
     <string name="trailer">预告片</string>
     <string name="movie_comment">影评</string>
     <string name="no_comment_tip">暂时还没有关于该影片的影评！</string>
@@ -35,4 +37,17 @@
     <string name="action_setting">Setting</string>
     <string name="poularMovie">热门电影：</string>
     <string name="highScoreMovie">高分电影：</string>
+
+    <string name="sync_frequency">同步频率</string>
+    <string name="sync_frequency_key">sync_id</string>
+    <string name="sync_4_hours">four_hours</string>
+    <string name="sync_a_day">one_day</string>
+    <string name="sync_a_week">one_week</string>
+    <string name="sync_never">never</string>
+    <string name="sync_4_hours_label">4小时</string>
+    <string name="sync_a_day_label">一天</string>
+    <string name="sync_a_week_label">一周</string>
+    <string name="sync_never_label">从不</string>
+
+
 </resources>
